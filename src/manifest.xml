@@ -1,0 +1,14 @@
+<manifest projecttype="SUITEAPP">
+  <publisherid>com.example</publisherid>
+  <projectid>suiteqlrunner</projectid>
+  <projectname>SuiteQL Runner</projectname>
+  <projectversion>1.0.0</projectversion>
+  <frameworkversion>1.0</frameworkversion>
+  <dependencies>
+    <features>
+      <feature required="true">SERVERSIDESCRIPTING</feature>
+      <feature required="true">RESTWEBSERVICES</feature>
+    </features>
+  </dependencies>
+</manifest>
+

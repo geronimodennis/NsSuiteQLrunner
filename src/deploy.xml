@@ -1,0 +1,10 @@
+<deploy>
+  <files>
+    <path>~/FileCabinet/SuiteApps/com.example.suiteqlrunner/*</path>
+    <path>~/FileCabinet/SuiteScripts/com.example.suiteqlrunner/*</path>
+  </files>
+  <objects>
+    <path>~/Objects/*</path>
+  </objects>
+</deploy>
+

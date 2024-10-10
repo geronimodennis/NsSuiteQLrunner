@@ -1,0 +1,18 @@
+<restlet scriptid="customscript_nsqlr_restlet">
+  <description>Executes SuiteQL for the SuiteQL Runner SPA.</description>
+  <isinactive>F</isinactive>
+  <name>SuiteQL Runner RESTlet</name>
+  <notifyadmins>F</notifyadmins>
+  <scriptfile>[/SuiteScripts/com.example.suiteqlrunner/SuiteQLRunnerRestlet.js]</scriptfile>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_nsqlr_restlet">
+      <allemployees>F</allemployees>
+      <allroles>T</allroles>
+      <isdeployed>T</isdeployed>
+      <loglevel>AUDIT</loglevel>
+      <status>RELEASED</status>
+      <title>SuiteQL Runner RESTlet</title>
+    </scriptdeployment>
+  </scriptdeployments>
+</restlet>
+
