@@ -14,9 +14,10 @@ export interface CompletionItem {
 }
 
 export interface QueryExecutionRequest {
+  executionMode: QueryExecutionMode;
   query: string;
-  maxRows: number;
-  pageSize?: number;
+  maxPages: number;
+  pageSize: number;
   params?: unknown[];
 }
 
@@ -47,6 +48,8 @@ export interface QueryRunnerGateway {
   execute(request: QueryExecutionRequest): Promise<GatewayExecutionResponse>;
 }
 
+export type QueryExecutionMode = 'RUN_SUITEQL' | 'RUN_SUITEQL_PAGED';
+
 export interface QueryRunOutcome {
   hints: QueryHint[];
   resultRows: Record<string, unknown>[];
@@ -55,3 +58,8 @@ export interface QueryRunOutcome {
   error: string | null;
 }
 
+export interface QueryRunOptions {
+  executionMode: QueryExecutionMode;
+  maxPagesText: string;
+  pageSizeText: string;
+}

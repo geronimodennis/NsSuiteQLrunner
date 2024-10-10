@@ -25,10 +25,10 @@ The bundle command compiles TypeScript from `src/SuiteApps` and writes deployabl
 
 ## Configure IDs
 
-The starter project uses example IDs:
+The starter project uses NetSuite-style IDs:
 
-- Publisher ID: `com.example`
-- SuiteApp path: `com.example.suiteqlrunner`
+- Publisher ID: `com.netsuite`
+- SuiteApp path: `com.netsuite.suiteqlrunner`
 - SPA script ID: `custspa_suiteqlrunner`
 - RESTlet script ID: `customscript_nsqlr_restlet`
 - RESTlet deployment ID: `customdeploy_nsqlr_restlet`
@@ -61,7 +61,7 @@ npm run deploy
 After deployment, open the SPA path:
 
 ```text
-/spa-app/com.example.suiteqlrunner/suiteqlrunner
+/spa-app/com.netsuite.suiteqlrunner/suiteqlrunner
 ```
 
 ## Production Hardening
@@ -73,4 +73,3 @@ Before deploying to production:
 - Confirm whether the RESTlet should run as the current role or a specific execution role.
 - Review logging level and retention expectations.
 - Test expected query sizes in sandbox before production use.
-

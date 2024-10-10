@@ -2,10 +2,10 @@
   <name>SuiteQL Runner</name>
   <description>SuiteQL editor, formatter, analyzer, autocomplete helper, runner, and performance matrix.</description>
   <url>suiteqlrunner</url>
-  <folder>[/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/]</folder>
-  <clientscriptfile>[/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/SpaClient.js]</clientscriptfile>
-  <serverscriptfile>[/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/SpaServer.js]</serverscriptfile>
-  <assetsfolder>[/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/assets/]</assetsfolder>
+  <folder>[/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/]</folder>
+  <clientscriptfile>[/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/SpaClient.js]</clientscriptfile>
+  <serverscriptfile>[/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/SpaServer.js]</serverscriptfile>
+  <assetsfolder>[/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/assets/]</assetsfolder>
   <loglevel>AUDIT</loglevel>
   <audienceallroles>T</audienceallroles>
   <audienceroles></audienceroles>

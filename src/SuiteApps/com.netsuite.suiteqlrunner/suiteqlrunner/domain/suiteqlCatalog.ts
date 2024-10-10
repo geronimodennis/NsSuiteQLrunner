@@ -1,7 +1,10 @@
 import {CompletionItem} from './models';
 
-export const DEFAULT_MAX_ROWS = 1000;
-export const HARD_MAX_ROWS = 5000;
+export const DEFAULT_MAX_PAGES = 50;
+export const DEFAULT_PAGE_SIZE = 1000;
+export const HARD_MAX_PAGES = 100;
+export const HARD_MAX_PAGE_SIZE = 1000;
+export const MIN_PAGE_SIZE = 5;
 
 export const SAMPLE_QUERY = `SELECT
     t.id,
@@ -158,4 +161,3 @@ export const COMPLETIONS: CompletionItem[] = [
     description: 'Common NetSuite record or dataset name'
   }))
 ];
-

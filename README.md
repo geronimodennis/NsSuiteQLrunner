@@ -4,6 +4,8 @@ SuiteQL Runner is an SDF SuiteApp that gives administrators, developers, and ana
 
 The app is built as a NetSuite Single Page Application and executes queries through a RESTlet. Local query hints are intentionally non-blocking: users can still run a query with warnings and see the exact NetSuite error in the result panel.
 
+![SuiteQL Runner screenshot](docs/assets/suiteql-runner-screenshot.png)
+
 ## Why Use This SuiteApp
 
 - It keeps SuiteQL work inside NetSuite, using the current user's role, permissions, and account context.
@@ -21,9 +23,11 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.
 - Static SuiteQL and Oracle SQL hinting for common errors and dialect mismatches.
 - Query autocomplete for SuiteQL keywords, NetSuite built-ins, Oracle functions, and common NetSuite record names.
-- RESTlet-based execution with `N/query.runSuiteQLPaged`.
+- RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
+- Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
+- Direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
 - Result grid rendered below the editor.
-- Performance matrix for client validation time, request latency, server execution time, rows, columns, pages, and governance usage.
+- Performance matrix for execution mode, API used, fallback status, client validation time, request latency, server execution time, rows, columns, pages, and governance usage.
 - SDF project layout with manifest, deploy file, SPA object, RESTlet object, and File Cabinet scripts.
 
 ## Project Layout
@@ -31,15 +35,15 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 ```text
 src/
   FileCabinet/
-    SuiteApps/com.example.suiteqlrunner/suiteqlrunner/
+    SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/
       SpaClient.js
       SpaServer.js
-    SuiteScripts/com.example.suiteqlrunner/
+    SuiteScripts/com.netsuite.suiteqlrunner/
       SuiteQLRunnerRestlet.js
   Objects/
     custspa_suiteqlrunner.xml
     customscript_nsqlr_restlet.xml
-  SuiteApps/com.example.suiteqlrunner/suiteqlrunner/
+  SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/
     application/
     domain/
     infrastructure/
@@ -92,7 +96,7 @@ The SuiteCloud CLI is included as a local dev dependency, so `npm run validate` 
 
 Before installing in a real NetSuite account:
 
-- Replace `com.example` and `com.example.suiteqlrunner` with your publisher ID and SuiteApp ID if required.
+- Confirm `com.netsuite` and `com.netsuite.suiteqlrunner` match your publisher ID and SuiteApp ID requirements.
 - Review the SPA and RESTlet audiences in `src/Objects/custspa_suiteqlrunner.xml` and `src/Objects/customscript_nsqlr_restlet.xml`.
 - Restrict access to trusted roles before using in production.
 
@@ -119,10 +123,10 @@ Recommended production controls:
 - Review query results before exporting or sharing data outside NetSuite.
 - Use sandbox or release preview for query development against sensitive data models.
 
-## Current Limitations
+## Current Limits
 
 - Static linting catches common SuiteQL, Oracle SQL, and SQL Server dialect issues, but NetSuite remains the execution authority.
 - Autocomplete is catalog-based and does not introspect account-specific custom records or fields yet.
-- The result grid shows mapped rows returned by the RESTlet and caps rows at a configurable maximum.
+- The result grid shows mapped rows returned by the RESTlet and caps paged execution by rows per page times max pages.
+- Rows per page defaults to `1000`. Max pages defaults to `50` and is clamped by the RESTlet.
 - SuiteCloud validation requires an authenticated SuiteCloud project setup.
-

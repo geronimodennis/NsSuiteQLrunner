@@ -1,7 +1,7 @@
 <deploy>
   <files>
-    <path>~/FileCabinet/SuiteApps/com.example.suiteqlrunner/*</path>
-    <path>~/FileCabinet/SuiteScripts/com.example.suiteqlrunner/*</path>
+    <path>~/FileCabinet/SuiteApps/com.netsuite.suiteqlrunner/*</path>
+    <path>~/FileCabinet/SuiteScripts/com.netsuite.suiteqlrunner/*</path>
   </files>
   <objects>
     <path>~/Objects/*</path>

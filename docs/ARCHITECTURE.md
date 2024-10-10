@@ -15,7 +15,7 @@ The dependency direction points inward. Presentation and infrastructure can depe
 
 ## Domain
 
-Path: `src/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/domain`
+Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/domain`
 
 Responsibilities:
 
@@ -26,21 +26,21 @@ Responsibilities:
 
 ## Application
 
-Path: `src/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/application`
+Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/application`
 
 Responsibilities:
 
 - `SuiteQLAnalyzer.ts` detects common SuiteQL and Oracle SQL issues.
 - `SuiteQLFormatter.ts` formats SQL text without knowing about UI state.
 - `CompletionService.ts` returns autocomplete suggestions.
-- `QueryRunnerService.ts` orchestrates validation timing, RESTlet execution, response mapping, and error formatting.
+- `QueryRunnerService.ts` orchestrates validation timing, execution-mode selection, pagination options, RESTlet execution, response mapping, and error formatting.
 - `PerformanceMatrix.ts` maps execution metadata into grid rows.
 
 Application services depend on gateway interfaces instead of direct NetSuite modules.
 
 ## Infrastructure
 
-Path: `src/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/infrastructure`
+Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/infrastructure`
 
 Responsibilities:
 
@@ -52,7 +52,7 @@ This is the only SPA layer that imports NetSuite integration modules.
 
 ## Presentation
 
-Path: `src/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/presentation`
+Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/presentation`
 
 Responsibilities:
 
@@ -62,7 +62,7 @@ Responsibilities:
 
 ## Composition Root
 
-Path: `src/SuiteApps/com.example.suiteqlrunner/suiteqlrunner/SuiteQLRunner.tsx`
+Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/SuiteQLRunner.tsx`
 
 Responsibilities:
 
@@ -72,13 +72,14 @@ Responsibilities:
 
 ## RESTlet Structure
 
-Path: `src/FileCabinet/SuiteScripts/com.example.suiteqlrunner/SuiteQLRunnerRestlet.js`
+Path: `src/FileCabinet/SuiteScripts/com.netsuite.suiteqlrunner/SuiteQLRunnerRestlet.js`
 
 The RESTlet remains one deployable SuiteScript file, but is organized into small functions:
 
 - `normalizeExecutionRequest`
 - `validateExecutionRequest`
-- `executeSuiteQL`
+- `executeDirectSuiteQL`
+- `executePagedSuiteQL`
 - `collectRows`
 - `successResponse`
 - `failureResponse`
@@ -86,3 +87,6 @@ The RESTlet remains one deployable SuiteScript file, but is organized into small
 
 This keeps SuiteScript deployment simple while preserving clean code boundaries.
 
+`executeDirectSuiteQL` uses `N/query.runSuiteQL`. If the result size reaches the configured page size, the RESTlet treats it as likely capped and falls back to `executePagedSuiteQL`.
+
+`executePagedSuiteQL` uses `N/query.runSuiteQLPaged` and fetches up to the requested max page count. The default max page count is `50`.

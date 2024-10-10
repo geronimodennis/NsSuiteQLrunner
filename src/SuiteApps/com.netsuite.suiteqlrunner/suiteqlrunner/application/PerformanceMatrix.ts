@@ -1,6 +1,9 @@
 import {QueryExecutionMeta} from '../domain/models';
 
 const METRICS: ReadonlyArray<readonly [string, string, string]> = [
+  ['Execution mode', 'executionMode', 'mode'],
+  ['Query API', 'queryApi', 'method'],
+  ['Auto paged fallback', 'autoPagedFallback', 'boolean'],
   ['Client validation', 'clientValidationMs', 'ms'],
   ['Request latency', 'requestLatencyMs', 'ms'],
   ['Server execution', 'serverExecutionMs', 'ms'],
@@ -9,7 +12,9 @@ const METRICS: ReadonlyArray<readonly [string, string, string]> = [
   ['Truncated', 'truncated', 'boolean'],
   ['Columns', 'columnCount', 'columns'],
   ['Pages fetched', 'pagesFetched', 'pages'],
-  ['Page size', 'pageSize', 'rows'],
+  ['Page size', 'pageSize', 'rows/page'],
+  ['Max pages', 'maxPages', 'pages'],
+  ['Row capacity', 'rowCapacity', 'rows'],
   ['Usage consumed', 'usageConsumed', 'units'],
   ['HTTP status', 'httpStatus', 'code']
 ];
@@ -21,4 +26,3 @@ export function buildPerformanceRows(meta: QueryExecutionMeta) {
     unit
   }));
 }
-

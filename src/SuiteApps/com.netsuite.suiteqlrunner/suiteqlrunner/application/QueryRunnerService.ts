@@ -1,11 +1,15 @@
 import {
-  HARD_MAX_ROWS,
-  DEFAULT_MAX_ROWS
+  DEFAULT_MAX_PAGES,
+  DEFAULT_PAGE_SIZE,
+  HARD_MAX_PAGES,
+  HARD_MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE
 } from '../domain/suiteqlCatalog';
 import {
   GatewayExecutionResponse,
   QueryExecutionMeta,
   QueryRunnerGateway,
+  QueryRunOptions,
   QueryRunOutcome
 } from '../domain/models';
 import {analyzeSuiteQL} from './SuiteQLAnalyzer';
@@ -13,7 +17,7 @@ import {analyzeSuiteQL} from './SuiteQLAnalyzer';
 export class QueryRunnerService {
   constructor(private readonly gateway: QueryRunnerGateway) {}
 
-  async run(query: string, maxRowsText: string): Promise<QueryRunOutcome> {
+  async run(query: string, options: QueryRunOptions): Promise<QueryRunOutcome> {
     const clientStartedAt = Date.now();
     const validationStartedAt = Date.now();
     const hints = analyzeSuiteQL(query);
@@ -21,8 +25,10 @@ export class QueryRunnerService {
 
     try {
       const response = await this.gateway.execute({
+        executionMode: options.executionMode,
         query,
-        maxRows: normalizeMaxRows(maxRowsText)
+        maxPages: normalizeMaxPages(options.maxPagesText),
+        pageSize: normalizePageSize(options.pageSizeText)
       });
       const performance = buildPerformance(response, clientValidationMs, Date.now() - clientStartedAt);
 
@@ -58,14 +64,22 @@ export class QueryRunnerService {
   }
 }
 
-function normalizeMaxRows(value: string): number {
+function normalizeMaxPages(value: string): number {
+  return normalizeNumber(value, 1, HARD_MAX_PAGES, DEFAULT_MAX_PAGES);
+}
+
+function normalizePageSize(value: string): number {
+  return normalizeNumber(value, MIN_PAGE_SIZE, HARD_MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE);
+}
+
+function normalizeNumber(value: string, min: number, max: number, fallback: number): number {
   const parsed = Number(value);
 
   if (!Number.isFinite(parsed)) {
-    return DEFAULT_MAX_ROWS;
+    return fallback;
   }
 
-  return Math.min(HARD_MAX_ROWS, Math.max(1, Math.floor(parsed)));
+  return Math.min(max, Math.max(min, Math.floor(parsed)));
 }
 
 function buildPerformance(
@@ -94,4 +108,3 @@ function formatExecutionError(response: GatewayExecutionResponse): string {
 
   return lines.join('\n');
 }
-

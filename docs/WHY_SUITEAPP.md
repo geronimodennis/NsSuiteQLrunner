@@ -22,7 +22,7 @@ A shared SuiteApp gives the team one consistent runner instead of ad hoc scripts
 
 ## Performance Visibility
 
-The runner returns a performance matrix with client validation time, request latency, server execution time, result count, returned rows, page metrics, and governance usage.
+The runner returns a performance matrix with the selected execution mode, query API used, fallback status, client validation time, request latency, server execution time, result count, returned rows, page metrics, and governance usage.
 
 Those metrics help users distinguish a slow query from a slow network request, a large result set, or a query that is consuming too much script usage.
 
@@ -37,4 +37,3 @@ It does not block execution because SuiteQL support can vary by account, feature
 Do not treat this as a public reporting portal. It is an administrative and developer tool for trusted users.
 
 For production analytics consumed by a wide audience, prefer dashboards, reports, workbooks, saved searches, or a purpose-built SuiteApp with fixed query surfaces and stricter authorization.
-

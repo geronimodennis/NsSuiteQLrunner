@@ -1,16 +1,32 @@
-import {Button, Portlet, StackPanel, Text, TextArea, TextBox} from '@uif-js/component';
-import {SystemIcon} from '@uif-js/core';
+import {Button, Dropdown, Portlet, StackPanel, Text, TextArea, TextBox} from '@uif-js/component';
+import {ArrayDataSource, SystemIcon} from '@uif-js/core';
+import {QueryExecutionMode} from '../domain/models';
 
 interface QueryEditorProps {
-  maxRows: string;
+  executionMode: QueryExecutionMode;
+  maxPages: string;
+  pageSize: string;
   query: string;
   running: boolean;
   onAnalyze: () => void;
+  onExecutionModeChanged: (mode: QueryExecutionMode) => void;
   onFormat: () => void;
-  onMaxRowsChanged: (maxRows: string) => void;
+  onMaxPagesChanged: (maxPages: string) => void;
+  onPageSizeChanged: (pageSize: string) => void;
   onQueryChanged: (query: string, caretPosition: number) => void;
   onRun: () => void;
 }
+
+const EXECUTION_MODES = new ArrayDataSource([
+  {
+    id: 'RUN_SUITEQL_PAGED',
+    label: 'runSuiteQLPaged'
+  },
+  {
+    id: 'RUN_SUITEQL',
+    label: 'runSuiteQL'
+  }
+]);
 
 export function QueryEditor(props: QueryEditorProps) {
   return (
@@ -32,16 +48,34 @@ export function QueryEditor(props: QueryEditorProps) {
               <Button label={'Analyze'} action={props.onAnalyze} />
             </StackPanel.Item>
             <StackPanel.Item shrink={0}>
+              <Dropdown
+                dataSource={EXECUTION_MODES}
+                valueMember={'id'}
+                displayMember={'label'}
+                selectedValue={props.executionMode}
+                onSelectionChanged={({value}) => props.onExecutionModeChanged(value as QueryExecutionMode)}
+                rootStyle={{width: '160px'}}
+              />
+            </StackPanel.Item>
+            <StackPanel.Item shrink={0}>
               <TextBox
-                text={props.maxRows}
-                placeholder={'Max rows'}
-                onTextChanged={({text}) => props.onMaxRowsChanged(text)}
+                text={props.pageSize}
+                placeholder={'Rows/page'}
+                onTextChanged={({text}) => props.onPageSizeChanged(text)}
                 rootStyle={{width: '110px'}}
+              />
+            </StackPanel.Item>
+            <StackPanel.Item shrink={0}>
+              <TextBox
+                text={props.maxPages}
+                placeholder={'Pages'}
+                onTextChanged={({text}) => props.onMaxPagesChanged(text)}
+                rootStyle={{width: '90px'}}
               />
             </StackPanel.Item>
             <StackPanel.Item grow={1}>
               <Text color={Text.Color.SECONDARY}>
-                Hints do not block execution. NetSuite execution errors appear in the result section.
+                Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped.
               </Text>
             </StackPanel.Item>
           </StackPanel>
@@ -64,4 +98,3 @@ export function QueryEditor(props: QueryEditorProps) {
     </Portlet>
   );
 }
-

@@ -19,8 +19,11 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
 
     var url__namespace = /*#__PURE__*/_interopNamespaceDefault(url);
 
-    const DEFAULT_MAX_ROWS = 1000;
-    const HARD_MAX_ROWS = 5000;
+    const DEFAULT_MAX_PAGES = 50;
+    const DEFAULT_PAGE_SIZE = 1000;
+    const HARD_MAX_PAGES = 100;
+    const HARD_MAX_PAGE_SIZE = 1000;
+    const MIN_PAGE_SIZE = 5;
     const SAMPLE_QUERY = `SELECT
     t.id,
     t.tranid,
@@ -405,15 +408,17 @@ ORDER BY
         constructor(gateway) {
             this.gateway = gateway;
         }
-        async run(query, maxRowsText) {
+        async run(query, options) {
             const clientStartedAt = Date.now();
             const validationStartedAt = Date.now();
             const hints = analyzeSuiteQL(query);
             const clientValidationMs = Date.now() - validationStartedAt;
             try {
                 const response = await this.gateway.execute({
+                    executionMode: options.executionMode,
                     query,
-                    maxRows: normalizeMaxRows(maxRowsText)
+                    maxPages: normalizeMaxPages(options.maxPagesText),
+                    pageSize: normalizePageSize(options.pageSizeText)
                 });
                 const performance = buildPerformance(response, clientValidationMs, Date.now() - clientStartedAt);
                 if (!response.ok) {
@@ -447,12 +452,18 @@ ORDER BY
             }
         }
     }
-    function normalizeMaxRows(value) {
+    function normalizeMaxPages(value) {
+        return normalizeNumber(value, 1, HARD_MAX_PAGES, DEFAULT_MAX_PAGES);
+    }
+    function normalizePageSize(value) {
+        return normalizeNumber(value, MIN_PAGE_SIZE, HARD_MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE);
+    }
+    function normalizeNumber(value, min, max, fallback) {
         const parsed = Number(value);
         if (!Number.isFinite(parsed)) {
-            return DEFAULT_MAX_ROWS;
+            return fallback;
         }
-        return Math.min(HARD_MAX_ROWS, Math.max(1, Math.floor(parsed)));
+        return Math.min(max, Math.max(min, Math.floor(parsed)));
     }
     function buildPerformance(response, clientValidationMs, requestLatencyMs) {
         return {
@@ -578,6 +589,9 @@ ORDER BY
     }
 
     const METRICS = [
+        ['Execution mode', 'executionMode', 'mode'],
+        ['Query API', 'queryApi', 'method'],
+        ['Auto paged fallback', 'autoPagedFallback', 'boolean'],
         ['Client validation', 'clientValidationMs', 'ms'],
         ['Request latency', 'requestLatencyMs', 'ms'],
         ['Server execution', 'serverExecutionMs', 'ms'],
@@ -586,7 +600,9 @@ ORDER BY
         ['Truncated', 'truncated', 'boolean'],
         ['Columns', 'columnCount', 'columns'],
         ['Pages fetched', 'pagesFetched', 'pages'],
-        ['Page size', 'pageSize', 'rows'],
+        ['Page size', 'pageSize', 'rows/page'],
+        ['Max pages', 'maxPages', 'pages'],
+        ['Row capacity', 'rowCapacity', 'rows'],
         ['Usage consumed', 'usageConsumed', 'units'],
         ['HTTP status', 'httpStatus', 'code']
     ];
@@ -614,8 +630,18 @@ ORDER BY
         return [textColumn('metric', 'Metric'), textColumn('value', 'Value'), textColumn('unit', 'Unit')];
     }
 
+    const EXECUTION_MODES = new core.ArrayDataSource([
+        {
+            id: 'RUN_SUITEQL_PAGED',
+            label: 'runSuiteQLPaged'
+        },
+        {
+            id: 'RUN_SUITEQL',
+            label: 'runSuiteQL'
+        }
+    ]);
     function QueryEditor(props) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxRows, placeholder: 'Max rows', onTextChanged: ({ text }) => props.onMaxRowsChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Hints do not block execution. NetSuite execution errors appear in the result section." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
+        return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Dropdown, { dataSource: EXECUTION_MODES, valueMember: 'id', displayMember: 'label', selectedValue: props.executionMode, onSelectionChanged: ({ value }) => props.onExecutionModeChanged(value), rootStyle: { width: '160px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.pageSize, placeholder: 'Rows/page', onTextChanged: ({ text }) => props.onPageSizeChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxPages, placeholder: 'Pages', onTextChanged: ({ text }) => props.onMaxPagesChanged(text), rootStyle: { width: '90px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
                                 fontFamily: 'Consolas, Monaco, monospace',
                                 width: '100%'
                             }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) })] }) }));
@@ -657,8 +683,10 @@ ORDER BY
                 resultRows: [],
                 resultColumns: [],
                 error: null,
+                executionMode: 'RUN_SUITEQL_PAGED',
                 running: false,
-                maxRows: '1000',
+                maxPages: String(DEFAULT_MAX_PAGES),
+                pageSize: String(DEFAULT_PAGE_SIZE),
                 caretPosition: SAMPLE_QUERY.length,
                 performance: {}
             };
@@ -673,7 +701,7 @@ ORDER BY
                                         label: 'Format',
                                         action: () => this.formatQuery()
                                     }
-                                ] }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxRows: this.state.maxRows, query: this.state.query, running: this.state.running, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onMaxRowsChanged: (maxRows) => this.setState({ maxRows }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRun: () => this.runQuery() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) })] }) }) }) })] }) }));
+                                ] }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { executionMode: this.state.executionMode, maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, running: this.state.running, onAnalyze: () => this.analyzeQuery(), onExecutionModeChanged: (executionMode) => this.setState({ executionMode }), onFormat: () => this.formatQuery(), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRun: () => this.runQuery() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) })] }) }) }) })] }) }));
         }
         renderAnalysisAndSuggestions() {
             return (jsxRuntime.jsxs(component.GridPanel, { columns: ['2fr', '1fr'], gap: component.GridPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 0, children: jsxRuntime.jsx(QueryHintsPanel, { hints: this.state.hints }) }), jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 1, children: jsxRuntime.jsx(AutocompletePanel, { suggestions: this.state.suggestions, onInsert: (suggestion) => this.insertSuggestion(suggestion) }) })] }));
@@ -717,7 +745,11 @@ ORDER BY
                 resultRows: [],
                 resultColumns: []
             });
-            const outcome = await this.queryRunner.run(this.state.query, this.state.maxRows);
+            const outcome = await this.queryRunner.run(this.state.query, {
+                executionMode: this.state.executionMode,
+                maxPagesText: this.state.maxPages,
+                pageSizeText: this.state.pageSize
+            });
             this.setState({
                 running: false,
                 hints: outcome.hints,

@@ -4,9 +4,9 @@ import {getCompletions} from './application/CompletionService';
 import {QueryRunnerService} from './application/QueryRunnerService';
 import {analyzeSuiteQL} from './application/SuiteQLAnalyzer';
 import {formatSuiteQL} from './application/SuiteQLFormatter';
-import {CompletionItem, QueryExecutionMeta, QueryHint} from './domain/models';
+import {CompletionItem, QueryExecutionMeta, QueryExecutionMode, QueryHint} from './domain/models';
 import {replaceActiveToken} from './domain/queryText';
-import {SAMPLE_QUERY} from './domain/suiteqlCatalog';
+import {DEFAULT_MAX_PAGES, DEFAULT_PAGE_SIZE, SAMPLE_QUERY} from './domain/suiteqlCatalog';
 import {NetSuiteRestletQueryGateway} from './infrastructure/NetSuiteRestletQueryGateway';
 import {AutocompletePanel} from './presentation/AutocompletePanel';
 import {PerformanceMatrixPanel} from './presentation/PerformanceMatrixPanel';
@@ -21,8 +21,10 @@ interface RunnerState {
   resultRows: Record<string, unknown>[];
   resultColumns: string[];
   error: string | null;
+  executionMode: QueryExecutionMode;
   running: boolean;
-  maxRows: string;
+  maxPages: string;
+  pageSize: string;
   caretPosition: number;
   performance: QueryExecutionMeta;
 }
@@ -39,8 +41,10 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       resultRows: [],
       resultColumns: [],
       error: null,
+      executionMode: 'RUN_SUITEQL_PAGED',
       running: false,
-      maxRows: '1000',
+      maxPages: String(DEFAULT_MAX_PAGES),
+      pageSize: String(DEFAULT_PAGE_SIZE),
       caretPosition: SAMPLE_QUERY.length,
       performance: {}
     };
@@ -73,12 +77,16 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                 <StackPanel.Vertical itemGap={StackPanel.GapSize.LARGE}>
                   <StackPanel.Item>
                     <QueryEditor
-                      maxRows={this.state.maxRows}
+                      executionMode={this.state.executionMode}
+                      maxPages={this.state.maxPages}
+                      pageSize={this.state.pageSize}
                       query={this.state.query}
                       running={this.state.running}
                       onAnalyze={() => this.analyzeQuery()}
+                      onExecutionModeChanged={(executionMode) => this.setState({executionMode})}
                       onFormat={() => this.formatQuery()}
-                      onMaxRowsChanged={(maxRows) => this.setState({maxRows})}
+                      onMaxPagesChanged={(maxPages) => this.setState({maxPages})}
+                      onPageSizeChanged={(pageSize) => this.setState({pageSize})}
                       onQueryChanged={(query, caretPosition) => this.onQueryChanged(query, caretPosition)}
                       onRun={() => this.runQuery()}
                     />
@@ -162,7 +170,11 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       resultColumns: []
     });
 
-    const outcome = await this.queryRunner.run(this.state.query, this.state.maxRows);
+    const outcome = await this.queryRunner.run(this.state.query, {
+      executionMode: this.state.executionMode,
+      maxPagesText: this.state.maxPages,
+      pageSizeText: this.state.pageSize
+    });
 
     this.setState({
       running: false,
@@ -174,4 +186,3 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     });
   }
 }
-

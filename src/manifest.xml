@@ -1,8 +1,8 @@
 <manifest projecttype="SUITEAPP">
-  <publisherid>com.example</publisherid>
+  <publisherid>com.netsuite</publisherid>
   <projectid>suiteqlrunner</projectid>
   <projectname>SuiteQL Runner</projectname>
-  <projectversion>1.0.0</projectversion>
+  <projectversion>1.1.0</projectversion>
   <frameworkversion>1.0</frameworkversion>
   <dependencies>
     <features>
@@ -11,4 +11,3 @@
     </features>
   </dependencies>
 </manifest>
-
