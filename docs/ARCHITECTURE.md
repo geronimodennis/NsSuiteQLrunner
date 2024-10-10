@@ -20,7 +20,7 @@ Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/domain`
 Responsibilities:
 
 - Shared models such as query hints, completion items, and execution responses.
-- SuiteQL catalog data such as keywords, Oracle functions, NetSuite built-ins, and common record names.
+- SuiteQL catalog data such as clauses, keywords, Oracle functions, NetSuite built-ins, pseudo-columns, and bind variables.
 - Query text helpers for token replacement and string/comment stripping.
 - Constants such as row limits and sample query text.
 

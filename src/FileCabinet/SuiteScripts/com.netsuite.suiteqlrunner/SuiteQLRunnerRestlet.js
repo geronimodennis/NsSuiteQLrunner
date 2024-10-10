@@ -14,7 +14,7 @@ define(['N/log', 'N/query', 'N/runtime'], (log, query, runtime) => {
     return {
       ok: true,
       service: 'SuiteQL Runner RESTlet',
-      version: '1.1.0',
+      version: '1.1.1',
       executionModes: ['RUN_SUITEQL', 'RUN_SUITEQL_PAGED']
     };
   }

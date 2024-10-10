@@ -22,7 +22,7 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - SuiteQL editor with Run, Analyze, and Format actions.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.
 - Static SuiteQL and Oracle SQL hinting for common errors and dialect mismatches.
-- Query autocomplete for SuiteQL keywords, NetSuite built-ins, Oracle functions, and common NetSuite record names.
+- Query autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
 - Direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
@@ -126,7 +126,7 @@ Recommended production controls:
 ## Current Limits
 
 - Static linting catches common SuiteQL, Oracle SQL, and SQL Server dialect issues, but NetSuite remains the execution authority.
-- Autocomplete is catalog-based and does not introspect account-specific custom records or fields yet.
+- Autocomplete is intentionally focused on known SuiteQL and Oracle SQL language constructs.
 - The result grid shows mapped rows returned by the RESTlet and caps paged execution by rows per page times max pages.
 - Rows per page defaults to `1000`. Max pages defaults to `50` and is clamped by the RESTlet.
 - SuiteCloud validation requires an authenticated SuiteCloud project setup.
