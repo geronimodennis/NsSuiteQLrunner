@@ -11,7 +11,7 @@ It should not be exposed as a broad reporting portal.
 1. Enter SuiteQL in the editor.
 2. Use Format to normalize keyword casing and clause layout.
 3. Review hints for likely SuiteQL or Oracle SQL issues.
-4. Choose `runSuiteQLPaged` or `runSuiteQL`.
+4. Check `Run as SuiteQLPaged` for paged execution, or leave it unchecked for direct `runSuiteQL`.
 5. Set rows per page and max pages.
 6. Run SuiteQL.
 7. Review the result grid and performance matrix.

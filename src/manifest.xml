@@ -2,7 +2,7 @@
   <publisherid>com.netsuite</publisherid>
   <projectid>suiteqlrunner</projectid>
   <projectname>SuiteQL Runner</projectname>
-  <projectversion>1.1.1</projectversion>
+  <projectversion>1.1.2</projectversion>
   <frameworkversion>1.0</frameworkversion>
   <dependencies>
     <features>

@@ -25,7 +25,7 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - Query autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
-- Direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
+- `Run as SuiteQLPaged` checkbox for paged execution, with unchecked direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
 - Result grid rendered below the editor.
 - Performance matrix for execution mode, API used, fallback status, client validation time, request latency, server execution time, rows, columns, pages, and governance usage.
 - SDF project layout with manifest, deploy file, SPA object, RESTlet object, and File Cabinet scripts.

@@ -77,17 +77,19 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                 <StackPanel.Vertical itemGap={StackPanel.GapSize.LARGE}>
                   <StackPanel.Item>
                     <QueryEditor
-                      executionMode={this.state.executionMode}
                       maxPages={this.state.maxPages}
                       pageSize={this.state.pageSize}
                       query={this.state.query}
+                      runAsSuiteQLPaged={this.state.executionMode === 'RUN_SUITEQL_PAGED'}
                       running={this.state.running}
                       onAnalyze={() => this.analyzeQuery()}
-                      onExecutionModeChanged={(executionMode) => this.setState({executionMode})}
                       onFormat={() => this.formatQuery()}
                       onMaxPagesChanged={(maxPages) => this.setState({maxPages})}
                       onPageSizeChanged={(pageSize) => this.setState({pageSize})}
                       onQueryChanged={(query, caretPosition) => this.onQueryChanged(query, caretPosition)}
+                      onRunAsSuiteQLPagedChanged={(runAsSuiteQLPaged) =>
+                        this.setState({executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL'})
+                      }
                       onRun={() => this.runQuery()}
                     />
                   </StackPanel.Item>

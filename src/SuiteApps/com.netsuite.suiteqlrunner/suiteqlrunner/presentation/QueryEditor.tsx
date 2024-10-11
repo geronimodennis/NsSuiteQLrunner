@@ -1,32 +1,20 @@
-import {Button, Dropdown, Portlet, StackPanel, Text, TextArea, TextBox} from '@uif-js/component';
-import {ArrayDataSource, SystemIcon} from '@uif-js/core';
-import {QueryExecutionMode} from '../domain/models';
+import {Button, CheckBox, Portlet, StackPanel, Text, TextArea, TextBox} from '@uif-js/component';
+import {SystemIcon} from '@uif-js/core';
 
 interface QueryEditorProps {
-  executionMode: QueryExecutionMode;
   maxPages: string;
   pageSize: string;
   query: string;
+  runAsSuiteQLPaged: boolean;
   running: boolean;
   onAnalyze: () => void;
-  onExecutionModeChanged: (mode: QueryExecutionMode) => void;
   onFormat: () => void;
   onMaxPagesChanged: (maxPages: string) => void;
   onPageSizeChanged: (pageSize: string) => void;
   onQueryChanged: (query: string, caretPosition: number) => void;
+  onRunAsSuiteQLPagedChanged: (value: boolean) => void;
   onRun: () => void;
 }
-
-const EXECUTION_MODES = new ArrayDataSource([
-  {
-    id: 'RUN_SUITEQL_PAGED',
-    label: 'runSuiteQLPaged'
-  },
-  {
-    id: 'RUN_SUITEQL',
-    label: 'runSuiteQL'
-  }
-]);
 
 export function QueryEditor(props: QueryEditorProps) {
   return (
@@ -48,13 +36,11 @@ export function QueryEditor(props: QueryEditorProps) {
               <Button label={'Analyze'} action={props.onAnalyze} />
             </StackPanel.Item>
             <StackPanel.Item shrink={0}>
-              <Dropdown
-                dataSource={EXECUTION_MODES}
-                valueMember={'id'}
-                displayMember={'label'}
-                selectedValue={props.executionMode}
-                onSelectionChanged={({value}) => props.onExecutionModeChanged(value as QueryExecutionMode)}
-                rootStyle={{width: '160px'}}
+              <CheckBox
+                label={'Run as SuiteQLPaged'}
+                labelPosition={CheckBox.LabelPosition.RIGHT}
+                value={props.runAsSuiteQLPaged}
+                action={({value}) => props.onRunAsSuiteQLPagedChanged(Boolean(value))}
               />
             </StackPanel.Item>
             <StackPanel.Item shrink={0}>
