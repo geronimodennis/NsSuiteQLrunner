@@ -102,7 +102,7 @@ Before installing in a real NetSuite account:
 - Review the SPA and RESTlet audiences in `src/Objects/custspa_suiteqlrunner.xml` and `src/Objects/customscript_nsqlr_restlet.xml`.
 - Restrict access to trusted roles before using in production.
 
-See [Deployment](./docs/DEPLOYMENT.md) and [Operations](./docs/OPERATIONS.md).
+See [How to Use](./docs/HOW_TO_USE.md), [Deployment](./docs/DEPLOYMENT.md), and [Operations](./docs/OPERATIONS.md).
 
 ## Scripts
 
