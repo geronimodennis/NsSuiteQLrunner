@@ -14,6 +14,7 @@ export interface CompletionItem {
 }
 
 export interface QueryExecutionRequest {
+  action?: 'RUN_SUITEQL';
   executionMode: QueryExecutionMode;
   query: string;
   maxPages: number;
@@ -49,6 +50,41 @@ export interface QueryRunnerGateway {
 }
 
 export type QueryExecutionMode = 'RUN_SUITEQL' | 'RUN_SUITEQL_PAGED';
+
+export type RecordChatRole = 'user' | 'assistant';
+
+export interface RecordChatMessage {
+  role: RecordChatRole;
+  text: string;
+}
+
+export interface RecordChatRequest {
+  action: 'CHAT_RECORDS';
+  message: string;
+  history: RecordChatMessage[];
+}
+
+export interface RecordChatResponse {
+  ok: boolean;
+  answer: string;
+  messages: RecordChatMessage[];
+  meta?: QueryExecutionMeta;
+  error?: QueryExecutionError;
+}
+
+export interface GatewayRecordChatResponse extends RecordChatResponse {
+  httpStatus: number;
+}
+
+export interface RecordChatGateway {
+  askRecordQuestion(request: RecordChatRequest): Promise<GatewayRecordChatResponse>;
+}
+
+export interface RecordChatOutcome {
+  messages: RecordChatMessage[];
+  meta: QueryExecutionMeta;
+  error: string | null;
+}
 
 export interface QueryRunOutcome {
   hints: QueryHint[];

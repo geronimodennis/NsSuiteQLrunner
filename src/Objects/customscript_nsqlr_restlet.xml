@@ -1,5 +1,5 @@
 <restlet scriptid="customscript_nsqlr_restlet">
-  <description>Executes SuiteQL for the SuiteQL Runner SPA.</description>
+  <description>Executes SuiteQL and answers AI record schema questions for the SuiteQL Runner SPA.</description>
   <isinactive>F</isinactive>
   <name>SuiteQL Runner RESTlet</name>
   <notifyadmins>F</notifyadmins>
@@ -15,4 +15,3 @@
     </scriptdeployment>
   </scriptdeployments>
 </restlet>
-

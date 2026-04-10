@@ -2,9 +2,10 @@ import {ApplicationHeader, ContentPanel, GridPanel, ScrollPanel, StackPanel, The
 import {PureComponent, SystemIcon, Theme} from '@uif-js/core';
 import {getCompletions} from './application/CompletionService';
 import {QueryRunnerService} from './application/QueryRunnerService';
+import {RecordChatService} from './application/RecordChatService';
 import {analyzeSuiteQL} from './application/SuiteQLAnalyzer';
 import {formatSuiteQL} from './application/SuiteQLFormatter';
-import {CompletionItem, QueryExecutionMeta, QueryExecutionMode, QueryHint} from './domain/models';
+import {CompletionItem, QueryExecutionMeta, QueryExecutionMode, QueryHint, RecordChatMessage} from './domain/models';
 import {replaceActiveToken} from './domain/queryText';
 import {DEFAULT_MAX_PAGES, DEFAULT_PAGE_SIZE, SAMPLE_QUERY} from './domain/suiteqlCatalog';
 import {NetSuiteRestletQueryGateway} from './infrastructure/NetSuiteRestletQueryGateway';
@@ -12,6 +13,7 @@ import {AutocompletePanel} from './presentation/AutocompletePanel';
 import {PerformanceMatrixPanel} from './presentation/PerformanceMatrixPanel';
 import {QueryEditor} from './presentation/QueryEditor';
 import {QueryHintsPanel} from './presentation/QueryHintsPanel';
+import {RecordChatPanel} from './presentation/RecordChatPanel';
 import {ResultsPanel} from './presentation/ResultsPanel';
 
 interface RunnerState {
@@ -27,10 +29,17 @@ interface RunnerState {
   pageSize: string;
   caretPosition: number;
   performance: QueryExecutionMeta;
+  recordChatDraft: string;
+  recordChatError: string | null;
+  recordChatMessages: RecordChatMessage[];
+  recordChatRunning: boolean;
+  recordChatVisible: boolean;
 }
 
 export default class SuiteQLRunner extends PureComponent<Record<string, never>, RunnerState> {
-  private readonly queryRunner = new QueryRunnerService(new NetSuiteRestletQueryGateway());
+  private readonly restletGateway = new NetSuiteRestletQueryGateway();
+  private readonly queryRunner = new QueryRunnerService(this.restletGateway);
+  private readonly recordChat = new RecordChatService(this.restletGateway);
 
   constructor(props, context) {
     super(props, context);
@@ -46,7 +55,17 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       maxPages: String(DEFAULT_MAX_PAGES),
       pageSize: String(DEFAULT_PAGE_SIZE),
       caretPosition: SAMPLE_QUERY.length,
-      performance: {}
+      performance: {},
+      recordChatDraft: '',
+      recordChatError: null,
+      recordChatMessages: [
+        {
+          role: 'assistant',
+          text: 'Ask about NetSuite record type IDs, SuiteQL table names, transaction type codes, standard fields, and schema patterns.'
+        }
+      ],
+      recordChatRunning: false,
+      recordChatVisible: false
     };
   }
 
@@ -67,6 +86,10 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                 {
                   label: 'Format',
                   action: () => this.formatQuery()
+                },
+                {
+                  label: 'AI Chat',
+                  action: () => this.toggleRecordChat()
                 }
               ]}
             />
@@ -108,6 +131,29 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
               </ContentPanel>
             </ScrollPanel>
           </StackPanel.Item>
+          {this.state.recordChatVisible ? (
+            <StackPanel.Item shrink={0} basis={'0px'}>
+              <RecordChatPanel
+                draft={this.state.recordChatDraft}
+                error={this.state.recordChatError}
+                messages={this.state.recordChatMessages}
+                running={this.state.recordChatRunning}
+                rootStyle={{
+                  position: 'fixed',
+                  right: '32px',
+                  bottom: '32px',
+                  width: '440px',
+                  maxHeight: '70vh',
+                  overflowY: 'auto',
+                  zIndex: '1000',
+                  boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
+                }}
+                onAsk={() => this.askRecordChat()}
+                onClear={() => this.clearRecordChat()}
+                onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
+              />
+            </StackPanel.Item>
+          ) : null}
         </StackPanel.Vertical>
       </ThemeSelector>
     );
@@ -185,6 +231,36 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       resultRows: outcome.resultRows,
       resultColumns: outcome.resultColumns,
       performance: outcome.performance
+    });
+  }
+
+  private async askRecordChat() {
+    this.setState({
+      recordChatRunning: true,
+      recordChatError: null
+    });
+
+    const outcome = await this.recordChat.ask(this.state.recordChatDraft, this.state.recordChatMessages);
+
+    this.setState({
+      recordChatDraft: outcome.error ? this.state.recordChatDraft : '',
+      recordChatError: outcome.error,
+      recordChatMessages: outcome.messages,
+      recordChatRunning: false
+    });
+  }
+
+  private toggleRecordChat() {
+    this.setState({
+      recordChatVisible: !this.state.recordChatVisible
+    });
+  }
+
+  private clearRecordChat() {
+    this.setState({
+      recordChatDraft: '',
+      recordChatError: null,
+      recordChatMessages: []
     });
   }
 }

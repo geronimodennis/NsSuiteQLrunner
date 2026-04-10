@@ -1,6 +1,6 @@
 # NetSuite SuiteQL Runner
 
-SuiteQL Runner is an SDF SuiteApp that gives administrators, developers, and analysts a NetSuite-native workspace for writing, formatting, checking, executing, and measuring SuiteQL.
+SuiteQL Runner is an SDF SuiteApp that gives administrators, developers, and analysts a NetSuite-native workspace for writing, formatting, checking, executing, measuring, and asking AI-assisted questions about SuiteQL and NetSuite record schemas.
 
 The app is built as a NetSuite Single Page Application and executes queries through a RESTlet. Local query hints are intentionally non-blocking: users can still run a query with warnings and see the exact NetSuite error in the result panel.
 
@@ -23,6 +23,8 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.
 - Static SuiteQL and Oracle SQL hinting for common errors and dialect mismatches.
 - Query autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
+- Header `AI Chat` toggle that opens a floating NetSuite record schema chat panel.
+- AI record chat uses the NetSuite `N/llm` module to answer questions about standard record type IDs, SuiteQL sources, transaction type codes, standard fields, and record schema patterns.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
 - `Run as SuiteQLPaged` checkbox for paged execution, with unchecked direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
@@ -60,12 +62,12 @@ src/
 The SPA follows clean architecture boundaries:
 
 - `domain` contains shared models, SuiteQL catalog data, query text helpers, and constants.
-- `application` contains query analysis, formatting, autocomplete, performance matrix mapping, and query-run orchestration.
-- `infrastructure` contains the NetSuite RESTlet gateway adapter.
-- `presentation` contains passive UIF panels and grid helpers.
+- `application` contains query analysis, formatting, autocomplete, performance matrix mapping, query-run orchestration, and record chat orchestration.
+- `infrastructure` contains the NetSuite RESTlet gateway adapter for query execution and AI record chat.
+- `presentation` contains passive UIF panels, floating record chat UI, and grid helpers.
 - `SuiteQLRunner.tsx` is the thin container that wires state, use cases, and presentation.
 
-The RESTlet is also organized into request normalization, validation, SuiteQL execution, row collection, response mapping, and telemetry helpers.
+The RESTlet is also organized into request normalization, validation, SuiteQL execution, record chat handling, row collection, response mapping, and telemetry helpers.
 
 See [Architecture](./docs/ARCHITECTURE.md) for more detail.
 

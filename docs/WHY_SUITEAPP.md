@@ -26,6 +26,12 @@ The runner returns a performance matrix with the selected execution mode, query 
 
 Those metrics help users distinguish a slow query from a slow network request, a large result set, or a query that is consuming too much script usage.
 
+## AI Record Schema Help
+
+The floating AI chat gives SuiteQL authors an in-account place to ask about standard NetSuite record type IDs, SuiteQL sources, transaction type codes, common standard fields, and schema patterns.
+
+It is meant to speed up query drafting, not replace account-specific verification. Custom records, custom fields, enabled-feature fields, and bundle-specific schema still need to be checked in the target NetSuite account.
+
 ## Guardrails Without Blocking
 
 The app highlights likely problems such as DDL/DML keywords, SQL Server-only functions, bracketed identifiers, unbalanced parentheses, and expensive `SELECT *` patterns.

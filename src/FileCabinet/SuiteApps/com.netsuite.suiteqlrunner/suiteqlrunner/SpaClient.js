@@ -567,6 +567,99 @@ ORDER BY
         return lines.join('\n');
     }
 
+    const MAX_MESSAGE_LENGTH = 4000;
+    class RecordChatService {
+        gateway;
+        constructor(gateway) {
+            this.gateway = gateway;
+        }
+        async ask(message, history) {
+            const normalizedMessage = normalizeMessage(message);
+            if (!normalizedMessage) {
+                return {
+                    messages: history,
+                    meta: {},
+                    error: 'Enter a record schema question before asking AI.'
+                };
+            }
+            const optimisticMessages = [
+                ...trimHistory(history),
+                {
+                    role: 'user',
+                    text: normalizedMessage
+                }
+            ];
+            try {
+                const startedAt = Date.now();
+                const response = await this.gateway.askRecordQuestion({
+                    action: 'CHAT_RECORDS',
+                    message: normalizedMessage,
+                    history: trimHistory(history)
+                });
+                const meta = buildChatMeta(response, Date.now() - startedAt);
+                if (!response.ok) {
+                    return {
+                        messages: optimisticMessages,
+                        meta,
+                        error: formatChatError(response)
+                    };
+                }
+                return {
+                    messages: response.messages && response.messages.length > 0 ? response.messages : appendAssistant(optimisticMessages, response.answer),
+                    meta,
+                    error: null
+                };
+            }
+            catch (error) {
+                return {
+                    messages: optimisticMessages,
+                    meta: {},
+                    error: error instanceof Error ? error.message : String(error)
+                };
+            }
+        }
+    }
+    function normalizeMessage(message) {
+        return String(message || '').trim().slice(0, MAX_MESSAGE_LENGTH);
+    }
+    function trimHistory(history) {
+        return history
+            .filter((message) => message.role === 'user' || message.role === 'assistant')
+            .filter((message) => normalizeMessage(message.text).length > 0)
+            .slice(-12)
+            .map((message) => ({
+            role: message.role,
+            text: normalizeMessage(message.text)
+        }));
+    }
+    function appendAssistant(messages, answer) {
+        return [
+            ...messages,
+            {
+                role: 'assistant',
+                text: answer || 'No answer was returned by the NetSuite LLM module.'
+            }
+        ];
+    }
+    function buildChatMeta(response, requestLatencyMs) {
+        return {
+            ...(response.meta || {}),
+            requestLatencyMs,
+            httpStatus: response.httpStatus
+        };
+    }
+    function formatChatError(response) {
+        const error = response.error || {};
+        const lines = [
+            error.name || error.code || 'AI record chat error',
+            error.message || 'NetSuite returned an error while asking the LLM module.'
+        ];
+        if (error.stack) {
+            lines.push('', error.stack);
+        }
+        return lines.join('\n');
+    }
+
     const KEYWORD_PATTERN = new RegExp(`\\b(${KEYWORDS.join('|')})\\b`, 'gi');
     function formatSuiteQL(query) {
         if (!query.trim()) {
@@ -645,13 +738,34 @@ ORDER BY
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(request)
+                body: JSON.stringify({
+                    ...request,
+                    action: 'RUN_SUITEQL'
+                })
             });
             const payload = await response.json();
             return {
                 ok: Boolean(payload.ok),
                 rows: payload.rows || [],
                 columns: payload.columns || [],
+                meta: payload.meta || {},
+                error: payload.error,
+                httpStatus: response.status
+            };
+        }
+        async askRecordQuestion(request) {
+            const response = await fetch(resolveRestletUrl(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(request)
+            });
+            const payload = await response.json();
+            return {
+                ok: Boolean(payload.ok),
+                answer: payload.answer || '',
+                messages: payload.messages || [],
                 meta: payload.meta || {},
                 error: payload.error,
                 httpStatus: response.status
@@ -734,6 +848,10 @@ ORDER BY
         return [textColumn('severity', 'Severity'), textColumn('message', 'Message'), textColumn('detail', 'Detail')];
     }
 
+    function RecordChatPanel(props) {
+        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Record Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [props.error ? (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) })) : null, props.messages.map((message, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: message.text, language: component.Code.Language.TEXT, lineWrapping: true }) })] }) }, `${message.role}-${index}`))), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) }));
+    }
+
     function ResultsPanel(props) {
         if (props.error) {
             return (jsxRuntime.jsx(component.Portlet, { title: 'Result', icon: core.SystemIcon.ERROR, children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) }));
@@ -745,7 +863,9 @@ ORDER BY
     }
 
     class SuiteQLRunner extends core.PureComponent {
-        queryRunner = new QueryRunnerService(new NetSuiteRestletQueryGateway());
+        restletGateway = new NetSuiteRestletQueryGateway();
+        queryRunner = new QueryRunnerService(this.restletGateway);
+        recordChat = new RecordChatService(this.restletGateway);
         constructor(props, context) {
             super(props, context);
             this.state = {
@@ -760,7 +880,17 @@ ORDER BY
                 maxPages: String(DEFAULT_MAX_PAGES),
                 pageSize: String(DEFAULT_PAGE_SIZE),
                 caretPosition: SAMPLE_QUERY.length,
-                performance: {}
+                performance: {},
+                recordChatDraft: '',
+                recordChatError: null,
+                recordChatMessages: [
+                    {
+                        role: 'assistant',
+                        text: 'Ask about NetSuite record type IDs, SuiteQL table names, transaction type codes, standard fields, and schema patterns.'
+                    }
+                ],
+                recordChatRunning: false,
+                recordChatVisible: false
             };
         }
         render() {
@@ -772,8 +902,21 @@ ORDER BY
                                     {
                                         label: 'Format',
                                         action: () => this.formatQuery()
+                                    },
+                                    {
+                                        label: 'AI Chat',
+                                        action: () => this.toggleRecordChat()
                                     }
-                                ] }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) })] }) }) }) })] }) }));
+                                ] }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) })] }) }) }) }), this.state.recordChatVisible ? (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {
+                                    position: 'fixed',
+                                    right: '32px',
+                                    bottom: '32px',
+                                    width: '440px',
+                                    maxHeight: '70vh',
+                                    overflowY: 'auto',
+                                    zIndex: '1000',
+                                    boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
+                                }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }) }) })) : null] }) }));
         }
         renderAnalysisAndSuggestions() {
             return (jsxRuntime.jsxs(component.GridPanel, { columns: ['2fr', '1fr'], gap: component.GridPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 0, children: jsxRuntime.jsx(QueryHintsPanel, { hints: this.state.hints }) }), jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 1, children: jsxRuntime.jsx(AutocompletePanel, { suggestions: this.state.suggestions, onInsert: (suggestion) => this.insertSuggestion(suggestion) }) })] }));
@@ -829,6 +972,31 @@ ORDER BY
                 resultRows: outcome.resultRows,
                 resultColumns: outcome.resultColumns,
                 performance: outcome.performance
+            });
+        }
+        async askRecordChat() {
+            this.setState({
+                recordChatRunning: true,
+                recordChatError: null
+            });
+            const outcome = await this.recordChat.ask(this.state.recordChatDraft, this.state.recordChatMessages);
+            this.setState({
+                recordChatDraft: outcome.error ? this.state.recordChatDraft : '',
+                recordChatError: outcome.error,
+                recordChatMessages: outcome.messages,
+                recordChatRunning: false
+            });
+        }
+        toggleRecordChat() {
+            this.setState({
+                recordChatVisible: !this.state.recordChatVisible
+            });
+        }
+        clearRecordChat() {
+            this.setState({
+                recordChatDraft: '',
+                recordChatError: null,
+                recordChatMessages: []
             });
         }
     }

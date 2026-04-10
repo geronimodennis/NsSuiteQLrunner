@@ -1,7 +1,7 @@
 {
   "name": "netsuite-suiteql-runner",
-  "version": "1.1.2",
-  "description": "SDF SuiteApp for running SuiteQL from a NetSuite SPA.",
+  "version": "1.2.0",
+  "description": "SDF SuiteApp for running SuiteQL and asking NetSuite AI record schema questions from a NetSuite SPA.",
   "scripts": {
     "clean": "gulp clean",
     "build": "gulp build",
