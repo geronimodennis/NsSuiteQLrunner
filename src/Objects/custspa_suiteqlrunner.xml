@@ -1,6 +1,6 @@
 <singlepageapp scriptid="custspa_suiteqlrunner">
   <name>SuiteQL Runner</name>
-  <description>SuiteQL editor, formatter, analyzer, autocomplete helper, AI record chat, runner, and performance matrix.</description>
+  <description>SuiteQL editor, formatter, analyzer, autocomplete helper, AI report and schema chat, runner, and performance matrix.</description>
   <url>suiteqlrunner</url>
   <folder>[/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/]</folder>
   <clientscriptfile>[/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/SpaClient.js]</clientscriptfile>

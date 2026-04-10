@@ -19,7 +19,7 @@ Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/domain`
 
 Responsibilities:
 
-- Shared models such as query hints, completion items, execution responses, and AI record chat messages.
+- Shared models such as query hints, completion items, execution responses, and AI report/schema chat messages.
 - SuiteQL catalog data such as clauses, keywords, Oracle functions, NetSuite built-ins, pseudo-columns, and bind variables.
 - Query text helpers for token replacement and string/comment stripping.
 - Constants such as row limits and sample query text.
@@ -34,7 +34,7 @@ Responsibilities:
 - `SuiteQLFormatter.ts` formats SQL text without knowing about UI state.
 - `CompletionService.ts` returns autocomplete suggestions.
 - `QueryRunnerService.ts` orchestrates validation timing, execution-mode selection, pagination options, RESTlet execution, response mapping, and error formatting.
-- `RecordChatService.ts` normalizes record schema questions, trims chat history, sends the AI request through the gateway, and maps NetSuite LLM errors into UI-safe messages.
+- `RecordChatService.ts` normalizes AI report, search, schema, and SuiteQL questions, trims chat history, sends the AI request through the gateway, and maps NetSuite LLM errors into UI-safe messages.
 - `PerformanceMatrix.ts` maps execution metadata into grid rows.
 
 Application services depend on gateway interfaces instead of direct NetSuite modules.
@@ -57,7 +57,7 @@ Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/presentation`
 
 Responsibilities:
 
-- Render the editor, hints, autocomplete, floating record chat, performance matrix, and results.
+- Render the editor, hints, autocomplete, floating report/schema chat, performance matrix, and results.
 - Convert view data into UIF component inputs such as `DataGrid` columns and `ArrayDataSource`.
 - Stay passive: panels receive props and callbacks, but do not execute SuiteQL or own business rules.
 
@@ -93,10 +93,10 @@ This keeps SuiteScript deployment simple while preserving clean code boundaries.
 
 `executePagedSuiteQL` uses `N/query.runSuiteQLPaged` and fetches up to the requested max page count. The default max page count is `50`.
 
-## AI Record Chat Flow
+## AI Report And Schema Chat Flow
 
-The SPA header includes an `AI Chat` action after `Format`. Clicking it toggles a floating chat panel.
+The SPA header includes an `AI Chat` action after `Format`. Clicking it toggles a floating chat panel below the header action area.
 
-The chat request is sent to the same RESTlet with action `CHAT_RECORDS`. The RESTlet uses `N/llm.generateText` with a record-schema preamble, concise chat history, and source documents that describe standard record ID patterns, common SuiteQL join patterns, and frequently used standard record families.
+The chat request is sent to the same RESTlet with action `CHAT_RECORDS`. The RESTlet uses `N/llm.generateText` with a reporting/search/schema preamble, concise chat history, and source documents that describe standard record ID patterns, common SuiteQL join patterns, report/search guidance, and frequently used standard record families.
 
-The assistant is designed for standard NetSuite record type IDs, SuiteQL source tables, transaction type codes, common standard fields, and schema patterns. Account-specific custom records, custom fields, and feature-dependent schema details should still be verified in the target account.
+The assistant specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL source tables, transaction type codes, common standard fields, joins, table relationships, and schema patterns. It can still answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when useful. Account-specific custom records, custom fields, and feature-dependent schema details should still be verified in the target account.

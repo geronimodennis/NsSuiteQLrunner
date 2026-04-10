@@ -15,7 +15,7 @@ interface RecordChatPanelProps {
 
 export function RecordChatPanel(props: RecordChatPanelProps) {
   return (
-    <Portlet title={'AI Record Chat'} icon={SystemIcon.HELP} rootStyle={props.rootStyle}>
+    <Portlet title={'AI Report & Schema Chat'} icon={SystemIcon.HELP} rootStyle={props.rootStyle}>
       <StackPanel.Vertical itemGap={StackPanel.GapSize.MEDIUM}>
         {props.error ? (
           <StackPanel.Item>

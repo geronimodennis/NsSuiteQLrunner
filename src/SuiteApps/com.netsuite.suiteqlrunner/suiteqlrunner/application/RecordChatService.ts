@@ -19,7 +19,7 @@ export class RecordChatService {
       return {
         messages: history,
         meta: {},
-        error: 'Enter a record schema question before asking AI.'
+        error: 'Enter a NetSuite report, search, record, field, join, or SuiteQL question before asking AI.'
       };
     }
 

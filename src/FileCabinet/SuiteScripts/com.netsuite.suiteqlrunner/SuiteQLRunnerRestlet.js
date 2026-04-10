@@ -13,27 +13,32 @@ define(['N/llm', 'N/log', 'N/query', 'N/runtime'], (llm, log, query, runtime) =>
   const MAX_CHAT_MESSAGE_LENGTH = 4000;
 
   const RECORD_CHAT_PREAMBLE = [
-    'You are the NetSuite SuiteQL Runner record schema assistant.',
-    'Answer questions about NetSuite record type IDs, SuiteScript record IDs, SuiteQL table names, transaction type codes, standard field IDs, sublists, joins, and schema patterns.',
+    'You are the NetSuite SuiteQL Runner AI assistant, specializing in reports, saved searches, record types, field IDs, joins, table relationships, and SuiteQL patterns.',
+    'For reporting and search questions, identify the likely search/report record type, useful filters, columns, joins, related SuiteQL sources, and any field ID caveats.',
+    'For schema questions, answer about NetSuite record type IDs, SuiteScript record IDs, SuiteQL table names, transaction type codes, standard field IDs, sublists, joins, and table relationships.',
+    'Do not limit answers only to records and schemas. If a broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, or reporting question is useful to the user, answer it and clearly state any uncertainty.',
     'Use the supplied documents first. If a question needs account-specific custom records, custom fields, or enabled-feature metadata, say that the user must verify it in their account Records Catalog, Records Browser, or Schema Browser.',
     'Distinguish record type ID, SuiteQL table/source, transaction type code, and field ID when those differ.',
     'Keep answers concise and practical. Include sample SuiteQL only when it directly helps the question.'
   ].join(' ');
 
   const RECORD_SCHEMA_GUIDANCE = [
-    'NetSuite ID patterns:',
+    'NetSuite reporting, search, and schema patterns:',
     '- Standard record type IDs are lowercase SuiteScript IDs such as customer, vendor, invoice, salesorder, purchaseorder, journalentry, account, department, classification, location, subsidiary, and currency.',
     '- Custom record type IDs usually use customrecord_<scriptid>.',
     '- Custom field IDs usually use custbody_, custcol_, custentity_, custitem_, custrecord_, or custpage_ prefixes depending on placement.',
+    '- Saved searches usually start from a search type or record type. The correct joins and available columns depend on that starting type.',
+    '- NetSuite reports and Workbook datasets may expose labels that differ from SuiteScript field IDs and SuiteQL column names.',
     '- Transaction records are often queried through the SuiteQL transaction table, with line data in transactionline.',
     '- Transaction type code values are not always the same as SuiteScript record type IDs. For example, invoice maps to transaction.type CustInvc and sales order maps to SalesOrd.',
     '- Internal ID means an individual record instance ID. Record type ID means the script/query identifier for the record family.',
     'Schema answer format:',
     '1. Record type ID.',
     '2. SuiteQL source table or join pattern.',
-    '3. Important body fields and line fields.',
+    '3. Important body fields, line fields, search columns, filters, and joins.',
     '4. Transaction type code when relevant.',
-    '5. Any account-specific caveat.'
+    '5. SuiteQL or saved search example when useful.',
+    '6. Any account-specific caveat.'
   ].join('\n');
 
   const COMMON_RECORDS = [
@@ -205,7 +210,7 @@ define(['N/llm', 'N/log', 'N/query', 'N/runtime'], (llm, log, query, runtime) =>
     return {
       ok: true,
       service: 'SuiteQL Runner RESTlet',
-      version: '1.2.0',
+      version: '1.2.1',
       actions: ['RUN_SUITEQL', 'CHAT_RECORDS'],
       executionModes: ['RUN_SUITEQL', 'RUN_SUITEQL_PAGED']
     };
@@ -378,7 +383,7 @@ define(['N/llm', 'N/log', 'N/query', 'N/runtime'], (llm, log, query, runtime) =>
     if (!request.message) {
       return {
         code: 'EMPTY_RECORD_CHAT_MESSAGE',
-        message: 'Enter a NetSuite record schema question before asking AI.'
+        message: 'Enter a NetSuite report, search, record, field, join, or SuiteQL question before asking AI.'
       };
     }
 
@@ -541,6 +546,17 @@ define(['N/llm', 'N/log', 'N/query', 'N/runtime'], (llm, log, query, runtime) =>
           'transactionline to account: transactionline.expenseaccount or transactionline.account references account.id depending on transaction and account feature context.',
           'display values: use BUILTIN.DF(field_reference) when the display name is needed instead of only the internal ID.',
           'mainline filters: transactions often need mainline = T for header rows or mainline = F for line rows, depending on whether the source is transaction or transactionline.'
+        ].join('\n')
+      },
+      {
+        id: 'netsuite-report-search-guidance',
+        data: [
+          'Reports and saved search guidance:',
+          'Start by identifying the business question, then the most natural base record or search type.',
+          'For transaction reporting, decide whether the answer needs transaction header fields, transaction line fields, accounting impacts, item detail, entity detail, or classification dimensions.',
+          'For saved searches, joins are relative to the selected search type. A field available through a join in a Transaction search may need a different SuiteQL table relationship.',
+          'For SuiteQL, prefer explicit joins and include internal IDs plus BUILTIN.DF display values when a report needs both machine-safe IDs and readable names.',
+          'When translating a saved search to SuiteQL, map filters, result columns, summary type, formulas, and joins separately.'
         ].join('\n')
       }
     ];

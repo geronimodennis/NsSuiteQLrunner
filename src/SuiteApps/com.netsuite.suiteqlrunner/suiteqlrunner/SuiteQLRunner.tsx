@@ -61,7 +61,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       recordChatMessages: [
         {
           role: 'assistant',
-          text: 'Ask about NetSuite record type IDs, SuiteQL table names, transaction type codes, standard fields, and schema patterns.'
+          text: 'Ask about NetSuite reports, searches, record types, field IDs, joins, table relationships, and SuiteQL patterns.'
         }
       ],
       recordChatRunning: false,
@@ -141,9 +141,9 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                 rootStyle={{
                   position: 'fixed',
                   right: '32px',
-                  bottom: '32px',
+                  top: '84px',
                   width: '440px',
-                  maxHeight: '70vh',
+                  maxHeight: 'calc(100vh - 108px)',
                   overflowY: 'auto',
                   zIndex: '1000',
                   boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'

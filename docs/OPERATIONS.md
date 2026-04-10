@@ -11,7 +11,7 @@ It should not be exposed as a broad reporting portal.
 1. Enter SuiteQL in the editor.
 2. Use Format to normalize keyword casing and clause layout.
 3. Review hints for likely SuiteQL or Oracle SQL issues.
-4. Select `AI Chat` in the header when you need help with standard NetSuite record type IDs, SuiteQL sources, transaction type codes, or schema patterns.
+4. Select `AI Chat` in the header when you need help with reports, saved searches, standard NetSuite record type IDs, SuiteQL sources, transaction type codes, joins, table relationships, or schema patterns.
 5. Check `Run as SuiteQLPaged` for paged execution, or leave it unchecked for direct `runSuiteQL`.
 6. Set rows per page and max pages.
 7. Run SuiteQL.
@@ -47,11 +47,13 @@ The RESTlet enforces the same pagination caps so users cannot bypass the UI by e
 
 Direct `runSuiteQL` mode is available for smaller queries. When direct execution returns at least the configured page size, the RESTlet automatically re-runs the query with `runSuiteQLPaged` to paginate longer result sets.
 
-## AI Record Chat
+## AI Report And Schema Chat
 
-Use the header `AI Chat` action to show or hide the floating chat panel.
+Use the header `AI Chat` action to show or hide the floating chat panel below the button.
 
-The chat is powered by NetSuite's `N/llm` module through the SuiteQL Runner RESTlet. It is intended for standard NetSuite record type IDs, SuiteQL table/source names, transaction type codes, common standard fields, and record schema patterns.
+The chat is powered by NetSuite's `N/llm` module through the SuiteQL Runner RESTlet. It specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL table/source names, transaction type codes, common standard fields, joins, table relationships, and schema patterns.
+
+The assistant is allowed to answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the user.
 
 Custom records, custom fields, and feature-dependent fields remain account-specific. Verify those details in the target account's Records Catalog, Records Browser, or Schema Browser before using them in production queries.
 

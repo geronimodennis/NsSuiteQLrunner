@@ -60,9 +60,9 @@ After execution, review:
 - `SuiteQL Performance Matrix`: API used, latency, server time, row counts, page counts, truncation, and governance usage.
 - `SuiteQL Hints`: local guidance based on the current query text.
 
-## 6. Ask AI About NetSuite Records
+## 6. Ask AI About Reports, Searches, And Records
 
-Select `AI Chat` in the header to show or hide the floating chat panel.
+Select `AI Chat` in the header to show or hide the floating chat panel below the button.
 
 Use it for questions like:
 
@@ -70,7 +70,15 @@ Use it for questions like:
 What is the record type ID and SuiteQL source for invoices?
 ```
 
-The AI chat is intended for standard NetSuite record type IDs, SuiteQL source names, transaction type codes, common standard fields, and join patterns.
+You can also ask:
+
+```text
+Which saved search type should I start from for invoice line reporting, and what SuiteQL joins match it?
+```
+
+The AI chat specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL source names, transaction type codes, common standard fields, joins, and table relationships.
+
+It can still answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the workflow.
 
 Custom records, custom fields, and feature-dependent schema should still be verified in the target account's Records Catalog, Records Browser, or Schema Browser.
 

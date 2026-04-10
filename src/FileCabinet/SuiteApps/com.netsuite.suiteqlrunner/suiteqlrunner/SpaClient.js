@@ -579,7 +579,7 @@ ORDER BY
                 return {
                     messages: history,
                     meta: {},
-                    error: 'Enter a record schema question before asking AI.'
+                    error: 'Enter a NetSuite report, search, record, field, join, or SuiteQL question before asking AI.'
                 };
             }
             const optimisticMessages = [
@@ -849,7 +849,7 @@ ORDER BY
     }
 
     function RecordChatPanel(props) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Record Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [props.error ? (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) })) : null, props.messages.map((message, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: message.text, language: component.Code.Language.TEXT, lineWrapping: true }) })] }) }, `${message.role}-${index}`))), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [props.error ? (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) })) : null, props.messages.map((message, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: message.text, language: component.Code.Language.TEXT, lineWrapping: true }) })] }) }, `${message.role}-${index}`))), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) }));
     }
 
     function ResultsPanel(props) {
@@ -886,7 +886,7 @@ ORDER BY
                 recordChatMessages: [
                     {
                         role: 'assistant',
-                        text: 'Ask about NetSuite record type IDs, SuiteQL table names, transaction type codes, standard fields, and schema patterns.'
+                        text: 'Ask about NetSuite reports, searches, record types, field IDs, joins, table relationships, and SuiteQL patterns.'
                     }
                 ],
                 recordChatRunning: false,
@@ -910,9 +910,9 @@ ORDER BY
                                 ] }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) })] }) }) }) }), this.state.recordChatVisible ? (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {
                                     position: 'fixed',
                                     right: '32px',
-                                    bottom: '32px',
+                                    top: '84px',
                                     width: '440px',
-                                    maxHeight: '70vh',
+                                    maxHeight: 'calc(100vh - 108px)',
                                     overflowY: 'auto',
                                     zIndex: '1000',
                                     boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
