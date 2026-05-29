@@ -39,6 +39,8 @@ Autocomplete suggests known SuiteQL and Oracle SQL language constructs such as c
 
 Hints are advisory. They can flag likely issues, but they do not block `Run SuiteQL`. NetSuite remains the final source of truth and returns execution errors in the Result panel.
 
+The SuiteQL Hints and Autocomplete panels are collapsible, so you can fold them while focusing on the editor and query results.
+
 ## 4. Choose Execution Mode
 
 Check `Run as SuiteQLPaged` when you want paginated results with `N/query.runSuiteQLPaged`.
@@ -59,6 +61,8 @@ After execution, review:
 - `Result`: returned rows or the NetSuite execution error.
 - `SuiteQL Performance Matrix`: API used, latency, server time, row counts, page counts, truncation, and governance usage.
 - `SuiteQL Hints`: local guidance based on the current query text.
+
+The Result panel appears directly below Query Editor. Result, SuiteQL Performance Matrix, SuiteQL Hints, and Autocomplete can be collapsed or expanded from their panel headers.
 
 ## 6. Ask AI About Reports, Searches, And Records
 

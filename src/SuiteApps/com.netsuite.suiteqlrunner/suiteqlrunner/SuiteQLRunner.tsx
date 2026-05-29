@@ -122,10 +122,6 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                   onRun={() => this.runQuery()}
                 />
               </StackPanel.Item>
-              <StackPanel.Item>{this.renderAnalysisAndSuggestions()}</StackPanel.Item>
-              <StackPanel.Item>
-                <PerformanceMatrixPanel performance={this.state.performance} />
-              </StackPanel.Item>
               <StackPanel.Item>
                 <ResultsPanel
                   columns={this.state.resultColumns}
@@ -133,6 +129,10 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                   rows={this.state.resultRows}
                 />
               </StackPanel.Item>
+              <StackPanel.Item>
+                <PerformanceMatrixPanel performance={this.state.performance} />
+              </StackPanel.Item>
+              <StackPanel.Item>{this.renderAnalysisAndSuggestions()}</StackPanel.Item>
             </StackPanel.Vertical>
           </ContentPanel>
         </ScrollPanel>

@@ -9,7 +9,7 @@ interface QueryHintsPanelProps {
 
 export function QueryHintsPanel({hints}: QueryHintsPanelProps) {
   return (
-    <Portlet title={'SuiteQL Hints'} icon={SystemIcon.INFO}>
+    <Portlet title={'SuiteQL Hints'} icon={SystemIcon.INFO} collapsible={true}>
       <DataGrid dataSource={new ArrayDataSource(toRows(hints))} columns={columns()} />
     </Portlet>
   );

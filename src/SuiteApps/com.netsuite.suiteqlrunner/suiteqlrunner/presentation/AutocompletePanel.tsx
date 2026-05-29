@@ -9,7 +9,7 @@ interface AutocompletePanelProps {
 
 export function AutocompletePanel({suggestions, onInsert}: AutocompletePanelProps) {
   return (
-    <Portlet title={'Autocomplete'} icon={SystemIcon.HELP}>
+    <Portlet title={'Autocomplete'} icon={SystemIcon.HELP} collapsible={true}>
       <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
         {suggestions.map((suggestion) => (
           <StackPanel.Item key={`${suggestion.type}-${suggestion.name}`}>

@@ -59,6 +59,8 @@ Responsibilities:
 
 - Render the editor, hints, autocomplete, floating report/schema chat, performance matrix, and results.
 - Convert view data into UIF component inputs such as `DataGrid` columns and `ArrayDataSource`.
+- Keep the main workflow ordered as Query Editor, Result, Performance Matrix, then Hints and Autocomplete.
+- Expose foldable secondary sections through UIF `Portlet` collapse controls.
 - Stay passive: panels receive props and callbacks, but do not execute SuiteQL or own business rules.
 
 ## Composition Root

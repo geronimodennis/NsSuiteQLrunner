@@ -781,7 +781,7 @@ ORDER BY
     }
 
     function AutocompletePanel({ suggestions, onInsert }) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'Autocomplete', icon: core.SystemIcon.HELP, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: suggestions.map((suggestion) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Button, { label: `${suggestion.name} - ${suggestion.type}`, action: () => onInsert(suggestion), rootStyle: { width: '100%', justifyContent: 'flex-start' } }) }, `${suggestion.type}-${suggestion.name}`))) }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'Autocomplete', icon: core.SystemIcon.HELP, collapsible: true, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: suggestions.map((suggestion) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Button, { label: `${suggestion.name} - ${suggestion.type}`, action: () => onInsert(suggestion), rootStyle: { width: '100%', justifyContent: 'flex-start' } }) }, `${suggestion.type}-${suggestion.name}`))) }) }));
     }
 
     const METRICS = [
@@ -820,7 +820,7 @@ ORDER BY
     }
 
     function PerformanceMatrixPanel({ performance }) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Performance Matrix', icon: core.SystemIcon.PERFORMANCE, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(buildPerformanceRows(performance || {})), columns: columns$1() }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Performance Matrix', icon: core.SystemIcon.PERFORMANCE, collapsible: true, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(buildPerformanceRows(performance || {})), columns: columns$1() }) }));
     }
     function columns$1() {
         return [textColumn('metric', 'Metric'), textColumn('value', 'Value'), textColumn('unit', 'Unit')];
@@ -834,7 +834,7 @@ ORDER BY
     }
 
     function QueryHintsPanel({ hints }) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Hints', icon: core.SystemIcon.INFO, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(toRows(hints)), columns: columns() }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Hints', icon: core.SystemIcon.INFO, collapsible: true, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(toRows(hints)), columns: columns() }) }));
     }
     function toRows(hints) {
         return hints.map((hint, index) => ({
@@ -862,12 +862,12 @@ ORDER BY
 
     function ResultsPanel(props) {
         if (props.error) {
-            return (jsxRuntime.jsx(component.Portlet, { title: 'Result', icon: core.SystemIcon.ERROR, children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) }));
+            return (jsxRuntime.jsx(component.Portlet, { title: 'Result', icon: core.SystemIcon.ERROR, collapsible: true, children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) }));
         }
         if (props.rows.length === 0) {
-            return (jsxRuntime.jsx(component.Portlet, { title: 'Result', icon: core.SystemIcon.LIST, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No results yet. Run a SuiteQL query to populate the grid." }) }));
+            return (jsxRuntime.jsx(component.Portlet, { title: 'Result', icon: core.SystemIcon.LIST, collapsible: true, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No results yet. Run a SuiteQL query to populate the grid." }) }));
         }
-        return (jsxRuntime.jsx(component.Portlet, { title: `Result (${props.rows.length} rows shown)`, icon: core.SystemIcon.LIST, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(props.rows), columns: props.columns.map((column) => textColumn(column)) }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: `Result (${props.rows.length} rows shown)`, icon: core.SystemIcon.LIST, collapsible: true, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(props.rows), columns: props.columns.map((column) => textColumn(column)) }) }));
     }
 
     class SuiteQLRunner extends core.PureComponent {
@@ -920,7 +920,7 @@ ORDER BY
                                 action: () => this.toggleRecordChat()
                             }
                         ] }) }, 'header'),
-                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) })] }) }) }) }, 'main')
+                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() })] }) }) }) }, 'main')
             ];
             if (this.state.recordChatVisible) {
                 items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {

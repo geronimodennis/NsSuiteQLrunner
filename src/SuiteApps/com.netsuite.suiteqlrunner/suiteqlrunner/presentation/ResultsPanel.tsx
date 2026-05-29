@@ -11,7 +11,7 @@ interface ResultsPanelProps {
 export function ResultsPanel(props: ResultsPanelProps) {
   if (props.error) {
     return (
-      <Portlet title={'Result'} icon={SystemIcon.ERROR}>
+      <Portlet title={'Result'} icon={SystemIcon.ERROR} collapsible={true}>
         <Code content={props.error} language={Code.Language.TEXT} background={Code.Background.ERROR} lineWrapping={true} />
       </Portlet>
     );
@@ -19,14 +19,14 @@ export function ResultsPanel(props: ResultsPanelProps) {
 
   if (props.rows.length === 0) {
     return (
-      <Portlet title={'Result'} icon={SystemIcon.LIST}>
+      <Portlet title={'Result'} icon={SystemIcon.LIST} collapsible={true}>
         <Text color={Text.Color.SECONDARY}>No results yet. Run a SuiteQL query to populate the grid.</Text>
       </Portlet>
     );
   }
 
   return (
-    <Portlet title={`Result (${props.rows.length} rows shown)`} icon={SystemIcon.LIST}>
+    <Portlet title={`Result (${props.rows.length} rows shown)`} icon={SystemIcon.LIST} collapsible={true}>
       <DataGrid dataSource={new ArrayDataSource(props.rows)} columns={props.columns.map((column) => textColumn(column))} />
     </Portlet>
   );

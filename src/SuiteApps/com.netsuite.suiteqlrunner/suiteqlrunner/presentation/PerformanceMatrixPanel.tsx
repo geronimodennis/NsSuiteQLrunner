@@ -10,7 +10,7 @@ interface PerformanceMatrixPanelProps {
 
 export function PerformanceMatrixPanel({performance}: PerformanceMatrixPanelProps) {
   return (
-    <Portlet title={'SuiteQL Performance Matrix'} icon={SystemIcon.PERFORMANCE}>
+    <Portlet title={'SuiteQL Performance Matrix'} icon={SystemIcon.PERFORMANCE} collapsible={true}>
       <DataGrid dataSource={new ArrayDataSource(buildPerformanceRows(performance || {}))} columns={columns()} />
     </Portlet>
   );

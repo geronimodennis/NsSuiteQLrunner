@@ -28,7 +28,8 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
 - `Run as SuiteQLPaged` checkbox for paged execution, with unchecked direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
-- Result grid rendered below the editor.
+- Result grid rendered immediately below the editor.
+- Collapsible Result, SuiteQL Performance Matrix, SuiteQL Hints, and Autocomplete panels so users can fold sections while iterating on a query.
 - Performance matrix for execution mode, API used, fallback status, client validation time, request latency, server execution time, rows, columns, pages, and governance usage.
 - SDF project layout with manifest, deploy file, SPA object, RESTlet object, and File Cabinet scripts.
 
