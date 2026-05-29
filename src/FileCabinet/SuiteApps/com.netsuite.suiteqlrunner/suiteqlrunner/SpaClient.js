@@ -24,18 +24,6 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     const HARD_MAX_PAGES = 100;
     const HARD_MAX_PAGE_SIZE = 1000;
     const MIN_PAGE_SIZE = 5;
-    const SAMPLE_QUERY = `SELECT
-    t.id,
-    t.tranid,
-    t.trandate,
-    t.type,
-    BUILTIN.DF(t.entity) AS entity_name
-FROM
-    transaction t
-WHERE
-    t.mainline = 'T'
-ORDER BY
-    t.trandate DESC`;
     const KEYWORDS = [
         'SELECT',
         'DISTINCT',
@@ -568,13 +556,15 @@ ORDER BY
     }
 
     const MAX_MESSAGE_LENGTH = 4000;
+    const MAX_QUERY_CONTEXT_LENGTH = 8000;
     class RecordChatService {
         gateway;
         constructor(gateway) {
             this.gateway = gateway;
         }
-        async ask(message, history) {
+        async ask(message, history, currentQuery) {
             const normalizedMessage = normalizeMessage(message);
+            const normalizedQuery = normalizeQueryContext(currentQuery);
             if (!normalizedMessage) {
                 return {
                     messages: history,
@@ -593,7 +583,7 @@ ORDER BY
                 const startedAt = Date.now();
                 const response = await this.gateway.askRecordQuestion({
                     action: 'CHAT_RECORDS',
-                    message: normalizedMessage,
+                    message: buildPrompt(normalizedMessage, normalizedQuery),
                     history: trimHistory(history)
                 });
                 const meta = buildChatMeta(response, Date.now() - startedAt);
@@ -605,7 +595,7 @@ ORDER BY
                     };
                 }
                 return {
-                    messages: response.messages && response.messages.length > 0 ? response.messages : appendAssistant(optimisticMessages, response.answer),
+                    messages: appendAssistant(optimisticMessages, response.answer),
                     meta,
                     error: null
                 };
@@ -621,6 +611,25 @@ ORDER BY
     }
     function normalizeMessage(message) {
         return String(message || '').trim().slice(0, MAX_MESSAGE_LENGTH);
+    }
+    function normalizeQueryContext(query) {
+        return String(query || '').trim().slice(0, MAX_QUERY_CONTEXT_LENGTH);
+    }
+    function buildPrompt(message, currentQuery) {
+        if (!currentQuery) {
+            return message;
+        }
+        return [
+            'The user is working in SuiteQL Runner. Use this current Query Editor SuiteQL when the user asks to fix, improve, explain, optimize, or troubleshoot the query.',
+            '',
+            'Current Query Editor SuiteQL:',
+            '```sql',
+            currentQuery,
+            '```',
+            '',
+            'User question:',
+            message
+        ].join('\n');
     }
     function trimHistory(history) {
         return history
@@ -780,8 +789,12 @@ ORDER BY
         });
     }
 
-    function AutocompletePanel({ suggestions, onInsert }) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'Autocomplete', icon: core.SystemIcon.HELP, collapsible: true, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: suggestions.map((suggestion) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Button, { label: `${suggestion.name} - ${suggestion.type}`, action: () => onInsert(suggestion), rootStyle: { width: '100%', justifyContent: 'flex-start' } }) }, `${suggestion.type}-${suggestion.name}`))) }) }));
+    function QueryEditor(props) {
+        const autocompleteItems = props.suggestions.slice(0, 10).map((suggestion) => (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: `${suggestion.name} - ${suggestion.type}`, action: () => props.onInsertSuggestion(suggestion) }) }, `${suggestion.type}-${suggestion.name}`)));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'AI Chat', action: props.onToggleRecordChat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Run as SuiteQLPaged', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.runAsSuiteQLPaged, action: ({ value }) => props.onRunAsSuiteQLPagedChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.pageSize, placeholder: 'Rows/page', onTextChanged: ({ text }) => props.onPageSizeChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxPages, placeholder: 'Pages', onTextChanged: ({ text }) => props.onMaxPagesChanged(text), rootStyle: { width: '90px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
+                                fontFamily: 'Consolas, Monaco, monospace',
+                                width: '100%'
+                            }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: autocompleteItems }) })] }) }));
     }
 
     const METRICS = [
@@ -819,24 +832,10 @@ ORDER BY
         };
     }
 
-    function PerformanceMatrixPanel({ performance }) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Performance Matrix', icon: core.SystemIcon.PERFORMANCE, collapsible: true, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(buildPerformanceRows(performance || {})), columns: columns$1() }) }));
+    function QueryDiagnosticsPanel({ hints, performance }) {
+        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Performance Matrix & Hints', icon: core.SystemIcon.PERFORMANCE, collapsible: true, children: jsxRuntime.jsxs(component.GridPanel, { columns: ['1fr', '2fr'], gap: component.GridPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Performance Matrix" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(buildPerformanceRows(performance || {})), columns: performanceColumns() }) })] }) }), jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Hints" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(toHintRows(hints)), columns: hintColumns() }) })] }) })] }) }));
     }
-    function columns$1() {
-        return [textColumn('metric', 'Metric'), textColumn('value', 'Value'), textColumn('unit', 'Unit')];
-    }
-
-    function QueryEditor(props) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'AI Chat', action: props.onToggleRecordChat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Run as SuiteQLPaged', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.runAsSuiteQLPaged, action: ({ value }) => props.onRunAsSuiteQLPagedChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.pageSize, placeholder: 'Rows/page', onTextChanged: ({ text }) => props.onPageSizeChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxPages, placeholder: 'Pages', onTextChanged: ({ text }) => props.onMaxPagesChanged(text), rootStyle: { width: '90px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
-                                fontFamily: 'Consolas, Monaco, monospace',
-                                width: '100%'
-                            }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) })] }) }));
-    }
-
-    function QueryHintsPanel({ hints }) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Hints', icon: core.SystemIcon.INFO, collapsible: true, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(toRows(hints)), columns: columns() }) }));
-    }
-    function toRows(hints) {
+    function toHintRows(hints) {
         return hints.map((hint, index) => ({
             id: index + 1,
             severity: hint.severity.toUpperCase(),
@@ -844,20 +843,28 @@ ORDER BY
             detail: hint.detail
         }));
     }
-    function columns() {
+    function performanceColumns() {
+        return [textColumn('metric', 'Metric'), textColumn('value', 'Value'), textColumn('unit', 'Unit')];
+    }
+    function hintColumns() {
         return [textColumn('severity', 'Severity'), textColumn('message', 'Message'), textColumn('detail', 'Detail')];
     }
 
     function RecordChatPanel(props) {
-        const items = [];
+        const responseItems = [];
         if (props.error) {
-            items.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) }, 'error'));
+            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) }, 'error'));
         }
         props.messages.forEach((message, index) => {
-            items.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: message.text, language: component.Code.Language.TEXT, lineWrapping: true }) })] }) }, `${message.role}-${index}`));
+            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: message.role === 'assistant' ? (renderMarkdown(message.text)) : (jsxRuntime.jsx(component.Code, { content: message.text, language: component.Code.Language.TEXT, lineWrapping: true })) })] }) }, `${message.role}-${index}`));
         });
-        items.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }, 'draft'), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) }, 'actions'));
-        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: items }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
+    }
+    function renderMarkdown(text) {
+        return component.FormattedText.markdown(text, {
+            wrap: true,
+            whitespace: true
+        });
     }
 
     function ResultsPanel(props) {
@@ -870,16 +877,18 @@ ORDER BY
         return (jsxRuntime.jsx(component.Portlet, { title: `Result (${props.rows.length} rows shown)`, icon: core.SystemIcon.LIST, collapsible: true, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(props.rows), columns: props.columns.map((column) => textColumn(column)) }) }));
     }
 
+    const WORKING_QUERY_STORAGE_KEY = 'suiteqlrunner.workingQuery';
     class SuiteQLRunner extends core.PureComponent {
         restletGateway = new NetSuiteRestletQueryGateway();
         queryRunner = new QueryRunnerService(this.restletGateway);
         recordChat = new RecordChatService(this.restletGateway);
         constructor(props, context) {
             super(props, context);
+            const workingQuery = this.loadWorkingQuery();
             this.state = {
-                query: SAMPLE_QUERY,
-                hints: analyzeSuiteQL(SAMPLE_QUERY),
-                suggestions: getCompletions(SAMPLE_QUERY, SAMPLE_QUERY.length),
+                query: workingQuery,
+                hints: analyzeSuiteQL(workingQuery),
+                suggestions: getCompletions(workingQuery, workingQuery.length),
                 resultRows: [],
                 resultColumns: [],
                 error: null,
@@ -887,7 +896,7 @@ ORDER BY
                 running: false,
                 maxPages: String(DEFAULT_MAX_PAGES),
                 pageSize: String(DEFAULT_PAGE_SIZE),
-                caretPosition: SAMPLE_QUERY.length,
+                caretPosition: workingQuery.length,
                 performance: {},
                 recordChatDraft: '',
                 recordChatError: null,
@@ -907,7 +916,7 @@ ORDER BY
         renderLayoutItems() {
             const items = [
                 jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.ApplicationHeader, { icon: core.SystemIcon.SEARCH, title: 'SuiteQL Runner', subtitle: 'Format, inspect, execute, and measure SuiteQL' }) }, 'header'),
-                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(PerformanceMatrixPanel, { performance: this.state.performance }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderAnalysisAndSuggestions() })] }) }) }) }, 'main')
+                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { hints: this.state.hints, performance: this.state.performance }) })] }) }) }) }, 'main')
             ];
             if (this.state.recordChatVisible) {
                 items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {
@@ -915,16 +924,13 @@ ORDER BY
                             right: '32px',
                             top: '84px',
                             width: '440px',
-                            maxHeight: 'calc(100vh - 108px)',
-                            overflowY: 'auto',
+                            height: 'calc(100vh - 108px)',
+                            overflow: 'hidden',
                             zIndex: '1000',
                             boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
                         }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }) }) }, 'record-chat'));
             }
             return items;
-        }
-        renderAnalysisAndSuggestions() {
-            return (jsxRuntime.jsx("div", { style: { width: '100%' }, children: jsxRuntime.jsxs(component.GridPanel, { columns: ['2fr', '1fr'], gap: component.GridPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 0, children: jsxRuntime.jsx(QueryHintsPanel, { hints: this.state.hints }) }), jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 1, children: jsxRuntime.jsx(AutocompletePanel, { suggestions: this.state.suggestions, onInsert: (suggestion) => this.insertSuggestion(suggestion) }) })] }) }));
         }
         onQueryChanged(query, caretPosition) {
             this.setState({
@@ -936,6 +942,7 @@ ORDER BY
         }
         formatQuery() {
             const formatted = formatSuiteQL(this.state.query);
+            this.saveWorkingQuery(formatted);
             this.setState({
                 query: formatted,
                 hints: analyzeSuiteQL(formatted),
@@ -944,6 +951,7 @@ ORDER BY
             });
         }
         analyzeQuery() {
+            this.saveWorkingQuery(this.state.query);
             this.setState({
                 hints: analyzeSuiteQL(this.state.query),
                 suggestions: getCompletions(this.state.query, this.state.caretPosition)
@@ -959,6 +967,7 @@ ORDER BY
             });
         }
         async runQuery() {
+            this.saveWorkingQuery(this.state.query);
             this.setState({
                 running: true,
                 error: null,
@@ -984,7 +993,7 @@ ORDER BY
                 recordChatRunning: true,
                 recordChatError: null
             });
-            const outcome = await this.recordChat.ask(this.state.recordChatDraft, this.state.recordChatMessages);
+            const outcome = await this.recordChat.ask(this.state.recordChatDraft, this.state.recordChatMessages, this.state.query);
             this.setState({
                 recordChatDraft: outcome.error ? this.state.recordChatDraft : '',
                 recordChatError: outcome.error,
@@ -1003,6 +1012,22 @@ ORDER BY
                 recordChatError: null,
                 recordChatMessages: []
             });
+        }
+        loadWorkingQuery() {
+            try {
+                return window.localStorage.getItem(WORKING_QUERY_STORAGE_KEY) || '';
+            }
+            catch {
+                return '';
+            }
+        }
+        saveWorkingQuery(query) {
+            try {
+                window.localStorage.setItem(WORKING_QUERY_STORAGE_KEY, query);
+            }
+            catch {
+                // Query persistence is best-effort; private browsing or account policy can block storage.
+            }
         }
     }
 

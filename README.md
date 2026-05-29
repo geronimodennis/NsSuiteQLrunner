@@ -20,16 +20,17 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 ## Features
 
 - SuiteQL editor with Run, Format, Analyze, and AI Chat actions.
+- Blank editor on first use, with automatic restore of the last query saved by Run, Format, or Analyze.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.
 - Static SuiteQL and Oracle SQL hinting for common errors and dialect mismatches.
-- Query autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
+- Query Editor autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
 - Query Editor `AI Chat` toggle that opens a floating chat panel.
-- AI chat uses the NetSuite `N/llm` module and specializes in reports, saved searches, standard record type IDs, SuiteQL sources, transaction type codes, standard fields, joins, and table relationships, while still allowing broader NetSuite and SuiteQL questions.
+- AI chat uses the NetSuite `N/llm` module, renders Markdown responses, and includes the current Query Editor SQL as context when users ask to fix, explain, improve, or optimize a query.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
 - `Run as SuiteQLPaged` checkbox for paged execution, with unchecked direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
 - Result grid rendered immediately below the editor.
-- Collapsible Result, SuiteQL Performance Matrix, SuiteQL Hints, and Autocomplete panels so users can fold sections while iterating on a query.
+- Collapsible Result and combined SuiteQL Performance Matrix & Hints panels so users can fold sections while iterating on a query.
 - Performance matrix for execution mode, API used, fallback status, client validation time, request latency, server execution time, rows, columns, pages, and governance usage.
 - SDF project layout with manifest, deploy file, SPA object, RESTlet object, and File Cabinet scripts.
 

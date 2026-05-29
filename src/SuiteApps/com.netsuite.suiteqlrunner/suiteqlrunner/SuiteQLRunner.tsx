@@ -1,4 +1,4 @@
-import {ApplicationHeader, ContentPanel, GridPanel, ScrollPanel, StackPanel, ThemeSelector} from '@uif-js/component';
+import {ApplicationHeader, ContentPanel, ScrollPanel, StackPanel, ThemeSelector} from '@uif-js/component';
 import {PureComponent, SystemIcon, Theme} from '@uif-js/core';
 import {getCompletions} from './application/CompletionService';
 import {QueryRunnerService} from './application/QueryRunnerService';
@@ -7,14 +7,14 @@ import {analyzeSuiteQL} from './application/SuiteQLAnalyzer';
 import {formatSuiteQL} from './application/SuiteQLFormatter';
 import {CompletionItem, QueryExecutionMeta, QueryExecutionMode, QueryHint, RecordChatMessage} from './domain/models';
 import {replaceActiveToken} from './domain/queryText';
-import {DEFAULT_MAX_PAGES, DEFAULT_PAGE_SIZE, SAMPLE_QUERY} from './domain/suiteqlCatalog';
+import {DEFAULT_MAX_PAGES, DEFAULT_PAGE_SIZE} from './domain/suiteqlCatalog';
 import {NetSuiteRestletQueryGateway} from './infrastructure/NetSuiteRestletQueryGateway';
-import {AutocompletePanel} from './presentation/AutocompletePanel';
-import {PerformanceMatrixPanel} from './presentation/PerformanceMatrixPanel';
 import {QueryEditor} from './presentation/QueryEditor';
-import {QueryHintsPanel} from './presentation/QueryHintsPanel';
+import {QueryDiagnosticsPanel} from './presentation/QueryDiagnosticsPanel';
 import {RecordChatPanel} from './presentation/RecordChatPanel';
 import {ResultsPanel} from './presentation/ResultsPanel';
+
+const WORKING_QUERY_STORAGE_KEY = 'suiteqlrunner.workingQuery';
 
 interface RunnerState {
   query: string;
@@ -43,10 +43,12 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
 
   constructor(props, context) {
     super(props, context);
+    const workingQuery = this.loadWorkingQuery();
+
     this.state = {
-      query: SAMPLE_QUERY,
-      hints: analyzeSuiteQL(SAMPLE_QUERY),
-      suggestions: getCompletions(SAMPLE_QUERY, SAMPLE_QUERY.length),
+      query: workingQuery,
+      hints: analyzeSuiteQL(workingQuery),
+      suggestions: getCompletions(workingQuery, workingQuery.length),
       resultRows: [],
       resultColumns: [],
       error: null,
@@ -54,7 +56,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       running: false,
       maxPages: String(DEFAULT_MAX_PAGES),
       pageSize: String(DEFAULT_PAGE_SIZE),
-      caretPosition: SAMPLE_QUERY.length,
+      caretPosition: workingQuery.length,
       performance: {},
       recordChatDraft: '',
       recordChatError: null,
@@ -97,8 +99,10 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                   query={this.state.query}
                   runAsSuiteQLPaged={this.state.executionMode === 'RUN_SUITEQL_PAGED'}
                   running={this.state.running}
+                  suggestions={this.state.suggestions}
                   onAnalyze={() => this.analyzeQuery()}
                   onFormat={() => this.formatQuery()}
+                  onInsertSuggestion={(suggestion) => this.insertSuggestion(suggestion)}
                   onMaxPagesChanged={(maxPages) => this.setState({maxPages})}
                   onPageSizeChanged={(pageSize) => this.setState({pageSize})}
                   onQueryChanged={(query, caretPosition) => this.onQueryChanged(query, caretPosition)}
@@ -117,9 +121,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                 />
               </StackPanel.Item>
               <StackPanel.Item>
-                <PerformanceMatrixPanel performance={this.state.performance} />
+                <QueryDiagnosticsPanel hints={this.state.hints} performance={this.state.performance} />
               </StackPanel.Item>
-              <StackPanel.Item>{this.renderAnalysisAndSuggestions()}</StackPanel.Item>
             </StackPanel.Vertical>
           </ContentPanel>
         </ScrollPanel>
@@ -139,8 +142,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
               right: '32px',
               top: '84px',
               width: '440px',
-              maxHeight: 'calc(100vh - 108px)',
-              overflowY: 'auto',
+              height: 'calc(100vh - 108px)',
+              overflow: 'hidden',
               zIndex: '1000',
               boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
             }}
@@ -155,21 +158,6 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     return items;
   }
 
-  private renderAnalysisAndSuggestions() {
-    return (
-      <div style={{width: '100%'}}>
-        <GridPanel columns={['2fr', '1fr']} gap={GridPanel.GapSize.LARGE}>
-          <GridPanel.Item rowIndex={0} columnIndex={0}>
-            <QueryHintsPanel hints={this.state.hints} />
-          </GridPanel.Item>
-          <GridPanel.Item rowIndex={0} columnIndex={1}>
-            <AutocompletePanel suggestions={this.state.suggestions} onInsert={(suggestion) => this.insertSuggestion(suggestion)} />
-          </GridPanel.Item>
-        </GridPanel>
-      </div>
-    );
-  }
-
   private onQueryChanged(query: string, caretPosition: number) {
     this.setState({
       query,
@@ -181,6 +169,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
 
   private formatQuery() {
     const formatted = formatSuiteQL(this.state.query);
+    this.saveWorkingQuery(formatted);
 
     this.setState({
       query: formatted,
@@ -191,6 +180,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   }
 
   private analyzeQuery() {
+    this.saveWorkingQuery(this.state.query);
+
     this.setState({
       hints: analyzeSuiteQL(this.state.query),
       suggestions: getCompletions(this.state.query, this.state.caretPosition)
@@ -209,6 +200,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   }
 
   private async runQuery() {
+    this.saveWorkingQuery(this.state.query);
+
     this.setState({
       running: true,
       error: null,
@@ -238,7 +231,11 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       recordChatError: null
     });
 
-    const outcome = await this.recordChat.ask(this.state.recordChatDraft, this.state.recordChatMessages);
+    const outcome = await this.recordChat.ask(
+      this.state.recordChatDraft,
+      this.state.recordChatMessages,
+      this.state.query
+    );
 
     this.setState({
       recordChatDraft: outcome.error ? this.state.recordChatDraft : '',
@@ -260,5 +257,21 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       recordChatError: null,
       recordChatMessages: []
     });
+  }
+
+  private loadWorkingQuery() {
+    try {
+      return window.localStorage.getItem(WORKING_QUERY_STORAGE_KEY) || '';
+    } catch {
+      return '';
+    }
+  }
+
+  private saveWorkingQuery(query: string) {
+    try {
+      window.localStorage.setItem(WORKING_QUERY_STORAGE_KEY, query);
+    } catch {
+      // Query persistence is best-effort; private browsing or account policy can block storage.
+    }
   }
 }

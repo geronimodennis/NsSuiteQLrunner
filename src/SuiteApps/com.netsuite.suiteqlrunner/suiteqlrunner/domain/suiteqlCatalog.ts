@@ -6,19 +6,6 @@ export const HARD_MAX_PAGES = 100;
 export const HARD_MAX_PAGE_SIZE = 1000;
 export const MIN_PAGE_SIZE = 5;
 
-export const SAMPLE_QUERY = `SELECT
-    t.id,
-    t.tranid,
-    t.trandate,
-    t.type,
-    BUILTIN.DF(t.entity) AS entity_name
-FROM
-    transaction t
-WHERE
-    t.mainline = 'T'
-ORDER BY
-    t.trandate DESC`;
-
 export const KEYWORDS = [
   'SELECT',
   'DISTINCT',

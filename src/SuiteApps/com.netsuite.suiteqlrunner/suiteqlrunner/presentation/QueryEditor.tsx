@@ -1,5 +1,6 @@
 import {Button, CheckBox, Portlet, StackPanel, Text, TextArea, TextBox} from '@uif-js/component';
 import {SystemIcon} from '@uif-js/core';
+import {CompletionItem} from '../domain/models';
 
 interface QueryEditorProps {
   maxPages: string;
@@ -7,6 +8,7 @@ interface QueryEditorProps {
   query: string;
   runAsSuiteQLPaged: boolean;
   running: boolean;
+  suggestions: CompletionItem[];
   onAnalyze: () => void;
   onFormat: () => void;
   onMaxPagesChanged: (maxPages: string) => void;
@@ -15,9 +17,19 @@ interface QueryEditorProps {
   onRunAsSuiteQLPagedChanged: (value: boolean) => void;
   onRun: () => void;
   onToggleRecordChat: () => void;
+  onInsertSuggestion: (suggestion: CompletionItem) => void;
 }
 
 export function QueryEditor(props: QueryEditorProps) {
+  const autocompleteItems = props.suggestions.slice(0, 10).map((suggestion) => (
+    <StackPanel.Item key={`${suggestion.type}-${suggestion.name}`} shrink={0}>
+      <Button
+        label={`${suggestion.name} - ${suggestion.type}`}
+        action={() => props.onInsertSuggestion(suggestion)}
+      />
+    </StackPanel.Item>
+  ));
+
   return (
     <Portlet title={'Query Editor'} icon={SystemIcon.EDIT}>
       <StackPanel.Vertical itemGap={StackPanel.GapSize.MEDIUM}>
@@ -83,6 +95,11 @@ export function QueryEditor(props: QueryEditorProps) {
             }}
             onTextChanged={(args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length)}
           />
+        </StackPanel.Item>
+        <StackPanel.Item>
+          <StackPanel wrap={true} itemGap={StackPanel.GapSize.SMALL} wrapGap={StackPanel.GapSize.SMALL}>
+            {autocompleteItems}
+          </StackPanel>
         </StackPanel.Item>
       </StackPanel.Vertical>
     </Portlet>

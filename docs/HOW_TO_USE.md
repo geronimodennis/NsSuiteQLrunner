@@ -14,32 +14,17 @@ The query runs through the RESTlet as the current NetSuite user, so role permiss
 
 Use the Query Editor for the SuiteQL statement.
 
-The editor starts with a sample transaction query:
-
-```sql
-SELECT
-    t.id,
-    t.tranid,
-    t.trandate,
-    t.type,
-    BUILTIN.DF(t.entity) AS entity_name
-FROM
-    transaction t
-WHERE
-    t.mainline = 'T'
-ORDER BY
-    t.trandate DESC
-```
+The editor starts blank on first use. When you select `Run SuiteQL`, `Format SuiteQL`, or `Analyze`, the current query is saved in browser storage and restored automatically when you leave the page and come back.
 
 Use `Format SuiteQL` to clean up keyword casing and line breaks. Use `Analyze` to refresh local hints before running.
 
 ## 3. Use Autocomplete and Hints
 
-Autocomplete suggests known SuiteQL and Oracle SQL language constructs such as clauses, functions, built-ins, pseudo-columns, and bind variables.
+Autocomplete suggestions appear inside Query Editor and include known SuiteQL and Oracle SQL language constructs such as clauses, functions, built-ins, pseudo-columns, and bind variables.
 
 Hints are advisory. They can flag likely issues, but they do not block `Run SuiteQL`. NetSuite remains the final source of truth and returns execution errors in the Result panel.
 
-The SuiteQL Hints and Autocomplete panels are collapsible, so you can fold them while focusing on the editor and query results.
+The combined SuiteQL Performance Matrix & Hints panel is collapsible, so you can fold it while focusing on the editor and query results.
 
 ## 4. Choose Execution Mode
 
@@ -59,10 +44,9 @@ Select `Run SuiteQL`.
 After execution, review:
 
 - `Result`: returned rows or the NetSuite execution error.
-- `SuiteQL Performance Matrix`: API used, latency, server time, row counts, page counts, truncation, and governance usage.
-- `SuiteQL Hints`: local guidance based on the current query text.
+- `SuiteQL Performance Matrix & Hints`: API used, latency, server time, row counts, page counts, truncation, governance usage, and local query guidance.
 
-The Result panel appears directly below Query Editor. Result, SuiteQL Performance Matrix, SuiteQL Hints, and Autocomplete can be collapsed or expanded from their panel headers.
+The Result panel appears directly below Query Editor. Result and SuiteQL Performance Matrix & Hints can be collapsed or expanded from their panel headers.
 
 ## 6. Ask AI About Reports, Searches, And Records
 
@@ -80,7 +64,9 @@ You can also ask:
 Which saved search type should I start from for invoice line reporting, and what SuiteQL joins match it?
 ```
 
-The AI chat specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL source names, transaction type codes, common standard fields, joins, and table relationships.
+The AI chat specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL source names, transaction type codes, common standard fields, joins, and table relationships. It can also use the current Query Editor SQL as context when you ask it to fix, explain, improve, troubleshoot, or optimize the query.
+
+AI responses support Markdown, including bullets and fenced SQL examples.
 
 It can still answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the workflow.
 

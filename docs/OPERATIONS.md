@@ -51,7 +51,7 @@ Direct `runSuiteQL` mode is available for smaller queries. When direct execution
 
 Use the Query Editor `AI Chat` action to show or hide the floating chat panel.
 
-The chat is powered by NetSuite's `N/llm` module through the SuiteQL Runner RESTlet. It specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL table/source names, transaction type codes, common standard fields, joins, table relationships, and schema patterns.
+The chat is powered by NetSuite's `N/llm` module through the SuiteQL Runner RESTlet. It specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL table/source names, transaction type codes, common standard fields, joins, table relationships, and schema patterns. The current Query Editor SQL is sent as context when asking AI, so users can request query fixes, explanations, improvements, troubleshooting, or optimization suggestions.
 
 The assistant is allowed to answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the user.
 

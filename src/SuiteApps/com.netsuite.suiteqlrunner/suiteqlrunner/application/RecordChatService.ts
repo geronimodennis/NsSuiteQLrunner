@@ -8,12 +8,14 @@ import {
 
 const MAX_HISTORY_MESSAGES = 12;
 const MAX_MESSAGE_LENGTH = 4000;
+const MAX_QUERY_CONTEXT_LENGTH = 8000;
 
 export class RecordChatService {
   constructor(private readonly gateway: RecordChatGateway) {}
 
-  async ask(message: string, history: RecordChatMessage[]): Promise<RecordChatOutcome> {
+  async ask(message: string, history: RecordChatMessage[], currentQuery: string): Promise<RecordChatOutcome> {
     const normalizedMessage = normalizeMessage(message);
+    const normalizedQuery = normalizeQueryContext(currentQuery);
 
     if (!normalizedMessage) {
       return {
@@ -35,7 +37,7 @@ export class RecordChatService {
       const startedAt = Date.now();
       const response = await this.gateway.askRecordQuestion({
         action: 'CHAT_RECORDS',
-        message: normalizedMessage,
+        message: buildPrompt(normalizedMessage, normalizedQuery),
         history: trimHistory(history)
       });
       const meta = buildChatMeta(response, Date.now() - startedAt);
@@ -49,7 +51,7 @@ export class RecordChatService {
       }
 
       return {
-        messages: response.messages && response.messages.length > 0 ? response.messages : appendAssistant(optimisticMessages, response.answer),
+        messages: appendAssistant(optimisticMessages, response.answer),
         meta,
         error: null
       };
@@ -65,6 +67,28 @@ export class RecordChatService {
 
 function normalizeMessage(message: string): string {
   return String(message || '').trim().slice(0, MAX_MESSAGE_LENGTH);
+}
+
+function normalizeQueryContext(query: string): string {
+  return String(query || '').trim().slice(0, MAX_QUERY_CONTEXT_LENGTH);
+}
+
+function buildPrompt(message: string, currentQuery: string): string {
+  if (!currentQuery) {
+    return message;
+  }
+
+  return [
+    'The user is working in SuiteQL Runner. Use this current Query Editor SuiteQL when the user asks to fix, improve, explain, optimize, or troubleshoot the query.',
+    '',
+    'Current Query Editor SuiteQL:',
+    '```sql',
+    currentQuery,
+    '```',
+    '',
+    'User question:',
+    message
+  ].join('\n');
 }
 
 function trimHistory(history: RecordChatMessage[]): RecordChatMessage[] {
