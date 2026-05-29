@@ -274,6 +274,36 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         return COMPLETIONS.filter((item) => item.name.toUpperCase().startsWith(token)).slice(0, DEFAULT_COMPLETION_LIMIT);
     }
 
+    const COMMON_UNSUPPORTED_FUNCTIONS = [
+        ['CURDATE', 'Use CURRENT_DATE or SYSDATE for Oracle-style current date expressions.'],
+        ['DATE_FORMAT', 'Use TO_CHAR(date_value, format_mask) for Oracle-style date formatting.'],
+        ['DAY', 'Use EXTRACT(DAY FROM date_value) for Oracle-style date parts.'],
+        ['IF', 'Use CASE WHEN ... THEN ... ELSE ... END for conditional expressions.'],
+        ['IFNULL', 'Use NVL or COALESCE for Oracle-style null handling.'],
+        ['IIF', 'Use CASE WHEN ... THEN ... ELSE ... END for conditional expressions.'],
+        ['MONTH', 'Use EXTRACT(MONTH FROM date_value) for Oracle-style date parts.'],
+        ['NOW', 'Use CURRENT_TIMESTAMP or SYSDATE for Oracle-style current time expressions.'],
+        ['STR_TO_DATE', 'Use TO_DATE(text_value, format_mask) for Oracle-style date parsing.'],
+        ['YEAR', 'Use EXTRACT(YEAR FROM date_value) for Oracle-style date parts.']
+    ];
+    const KNOWN_FUNCTIONS = new Set([
+        ...ORACLE_FUNCTIONS.map(([name]) => name.toUpperCase()),
+        ...SUITEQL_FUNCTIONS.map(([name]) => name.toUpperCase()),
+        ...SQL_SERVER_PATTERNS.map(([name]) => name.toUpperCase())
+    ]);
+    const COMMON_UNSUPPORTED_FUNCTION_NAMES = new Set(COMMON_UNSUPPORTED_FUNCTIONS.map(([name]) => name.toUpperCase()));
+    const FUNCTION_SYNTAX_WORDS = new Set([
+        'AS',
+        'CASE',
+        'EXISTS',
+        'EXTRACT',
+        'FROM',
+        'IN',
+        'NOT',
+        'OVER',
+        'SELECT',
+        'WITH'
+    ]);
     function analyzeSuiteQL(query) {
         const hints = [];
         const trimmed = query.trim();
@@ -304,6 +334,8 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         }
         addMutationHints(analysisText, hints);
         addSqlServerDialectHints(analysisText, hints);
+        addPotentialSyntaxHints(analysisText, hints);
+        addUnsupportedFunctionHints(analysisText, hints);
         addIdentifierHints(query, hints);
         addOracleLimitHint(analysisText, hints);
         addPerformanceHints(analysisText, hints);
@@ -349,6 +381,81 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             }
         });
     }
+    function addPotentialSyntaxHints(analysisText, hints) {
+        const compact = analysisText.replace(/\s+/g, ' ').trim();
+        if (/\bSELECT\s+FROM\b/i.test(compact)) {
+            hints.push({
+                severity: 'error',
+                message: 'SELECT has no columns before FROM.',
+                detail: 'Add at least one expression or column between SELECT and FROM.'
+            });
+        }
+        if (/\bSELECT\s*,/i.test(compact)) {
+            hints.push({
+                severity: 'error',
+                message: 'SELECT list starts with a comma.',
+                detail: 'Remove the leading comma or add the missing first selected expression.'
+            });
+        }
+        if (/,\s*(FROM|WHERE|GROUP\s+BY|HAVING|ORDER\s+BY|FETCH|OFFSET|$)/i.test(compact)) {
+            hints.push({
+                severity: 'error',
+                message: 'Possible trailing comma in query clause.',
+                detail: 'Check the SELECT list, GROUP BY list, or ORDER BY list for a comma before the next clause.'
+            });
+        }
+        if (/\b(WHERE|ON|HAVING)\s*(GROUP\s+BY|ORDER\s+BY|FETCH|OFFSET|$)/i.test(compact)) {
+            hints.push({
+                severity: 'error',
+                message: 'Predicate clause appears to be empty.',
+                detail: 'Add a condition after WHERE, ON, or HAVING before starting the next clause.'
+            });
+        }
+        if (/\b(AND|OR)\s*(GROUP\s+BY|ORDER\s+BY|HAVING|FETCH|OFFSET|$)/i.test(compact)) {
+            hints.push({
+                severity: 'error',
+                message: 'Boolean operator has no right-hand condition.',
+                detail: 'Add a condition after AND/OR or remove the dangling operator.'
+            });
+        }
+        if (/(=|<>|!=|<|>|<=|>=|\+|-|\*|\/)\s*(GROUP\s+BY|ORDER\s+BY|HAVING|FETCH|OFFSET|$)/i.test(compact)) {
+            hints.push({
+                severity: 'error',
+                message: 'Operator appears to be missing a right-hand value.',
+                detail: 'Check comparison and arithmetic expressions for an incomplete right side.'
+            });
+        }
+        if (/\bJOIN\s+[A-Z0-9_$#."]+\s*(JOIN|WHERE|GROUP\s+BY|ORDER\s+BY|HAVING|FETCH|OFFSET|$)/i.test(compact)) {
+            hints.push({
+                severity: 'warning',
+                message: 'JOIN may be missing an ON condition.',
+                detail: 'Most SuiteQL joins should include ON. Use CROSS JOIN only when a Cartesian join is intentional.'
+            });
+        }
+    }
+    function addUnsupportedFunctionHints(analysisText, hints) {
+        COMMON_UNSUPPORTED_FUNCTIONS.forEach(([functionName, detail]) => {
+            if (new RegExp(`\\b${functionName}\\s*\\(`, 'i').test(analysisText)) {
+                hints.push({
+                    severity: 'warning',
+                    message: `${functionName} may not be supported by Oracle/SuiteQL.`,
+                    detail
+                });
+            }
+        });
+        getFunctionCalls(analysisText).forEach((functionName) => {
+            if (KNOWN_FUNCTIONS.has(functionName) ||
+                COMMON_UNSUPPORTED_FUNCTION_NAMES.has(functionName) ||
+                FUNCTION_SYNTAX_WORDS.has(functionName)) {
+                return;
+            }
+            hints.push({
+                severity: 'warning',
+                message: `${functionName} is not in the known SuiteQL/Oracle function list.`,
+                detail: 'This static check may not know every account-supported function. Verify the function name or replace it with a documented SuiteQL or Oracle equivalent.'
+            });
+        });
+    }
     function addIdentifierHints(query, hints) {
         if (/\[[^\]]+\]/.test(query)) {
             hints.push({
@@ -379,6 +486,15 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     function hasMultipleStatements(analysisText) {
         const withoutTrailingSemicolon = analysisText.trim().replace(/;+\s*$/, '');
         return /;/.test(withoutTrailingSemicolon);
+    }
+    function getFunctionCalls(analysisText) {
+        const functions = new Set();
+        const pattern = /\b((?:BUILTIN\.)?[A-Z][A-Z0-9_$#]*)\s*\(/g;
+        let match;
+        while ((match = pattern.exec(analysisText)) !== null) {
+            functions.add(match[1].toUpperCase());
+        }
+        return Array.from(functions);
     }
     function getBalanceHint(query) {
         let parenDepth = 0;

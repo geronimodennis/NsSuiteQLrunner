@@ -32,7 +32,7 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - SuiteQL editor with Run, Format, Analyze, and AI Chat actions.
 - Blank editor on first use, with automatic restore of the last query saved by Run, Format, or Analyze.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.
-- Static SuiteQL and Oracle SQL hinting for common errors and dialect mismatches.
+- Static SuiteQL and Oracle SQL hinting for common errors, malformed query patterns, unsupported functions, and dialect mismatches.
 - Query Editor autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
 - Query Editor `AI Chat` toggle that opens a floating chat panel.
 - AI chat uses the NetSuite `N/llm` module, opens in a resizable floating panel with a close button, renders Markdown responses, and includes the current Query Editor SQL as context when users ask to fix, explain, improve, or optimize a query.

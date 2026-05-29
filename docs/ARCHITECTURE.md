@@ -30,7 +30,7 @@ Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/application`
 
 Responsibilities:
 
-- `SuiteQLAnalyzer.ts` detects common SuiteQL and Oracle SQL issues.
+- `SuiteQLAnalyzer.ts` detects common SuiteQL and Oracle SQL issues, malformed query patterns, and potentially unsupported functions.
 - `SuiteQLFormatter.ts` formats SQL text without knowing about UI state.
 - `CompletionService.ts` returns autocomplete suggestions.
 - `QueryRunnerService.ts` orchestrates validation timing, execution-mode selection, pagination options, RESTlet execution, response mapping, and error formatting.

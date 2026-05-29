@@ -34,7 +34,7 @@ It is meant to speed up query drafting and reporting analysis, not replace accou
 
 ## Guardrails Without Blocking
 
-The app highlights likely problems such as DDL/DML keywords, SQL Server-only functions, bracketed identifiers, unbalanced parentheses, and expensive `SELECT *` patterns.
+The app highlights likely problems such as DDL/DML keywords, malformed clauses, dangling operators, trailing commas, SQL Server-only functions, unsupported function names, bracketed identifiers, unbalanced parentheses, and expensive `SELECT *` patterns.
 
 It does not block execution because SuiteQL support can vary by account, feature, and NetSuite release. NetSuite still returns the authoritative error in the result panel.
 
