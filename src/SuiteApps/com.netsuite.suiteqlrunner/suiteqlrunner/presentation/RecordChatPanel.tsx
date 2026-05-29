@@ -1,4 +1,4 @@
-import {Button, Code, FormattedText, Portlet, ScrollPanel, StackPanel, Text, TextArea} from '@uif-js/component';
+import {Button, FormattedText, Portlet, ScrollPanel, StackPanel, Text, TextArea} from '@uif-js/component';
 import {SystemIcon} from '@uif-js/core';
 import {RecordChatMessage} from '../domain/models';
 
@@ -10,6 +10,7 @@ interface RecordChatPanelProps {
   rootStyle?: Record<string, string>;
   onAsk: () => void;
   onClear: () => void;
+  onClose: () => void;
   onDraftChanged: (draft: string) => void;
 }
 
@@ -19,7 +20,7 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
   if (props.error) {
     responseItems.push(
       <StackPanel.Item key={'error'}>
-        <Code content={props.error} language={Code.Language.TEXT} background={Code.Background.ERROR} lineWrapping={true} />
+        {renderPlainText(props.error, true)}
       </StackPanel.Item>
     );
   }
@@ -35,7 +36,7 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
             {message.role === 'assistant' ? (
               renderMarkdown(message.text)
             ) : (
-              <Code content={message.text} language={Code.Language.TEXT} lineWrapping={true} />
+              renderPlainText(message.text)
             )}
           </StackPanel.Item>
         </StackPanel.Vertical>
@@ -46,6 +47,13 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
   return (
     <Portlet title={'AI Report & Schema Chat'} icon={SystemIcon.HELP} rootStyle={props.rootStyle}>
       <StackPanel.Vertical rootStyle={{height: '100%'}} itemGap={StackPanel.GapSize.MEDIUM}>
+        <StackPanel.Item shrink={0}>
+          <StackPanel alignment={StackPanel.Alignment.END}>
+            <StackPanel.Item shrink={0}>
+              <Button label={'Close'} action={props.onClose} />
+            </StackPanel.Item>
+          </StackPanel>
+        </StackPanel.Item>
         <StackPanel.Item grow={1}>
           <StackPanel.Vertical rootStyle={{height: '100%'}} itemGap={StackPanel.GapSize.SMALL}>
             <StackPanel.Item shrink={0}>
@@ -98,7 +106,7 @@ function renderMarkdown(text: string) {
   const items = parseMarkdownBlocks(text).map((block, index) => (
     <StackPanel.Item key={`markdown-${index}`}>
       {block.type === 'code' ? (
-        <Code content={block.content} language={codeLanguage(block.language)} lineWrapping={true} />
+        renderCodeBlock(block.content)
       ) : (
         FormattedText.markdown(block.content, {
           wrap: true,
@@ -109,6 +117,50 @@ function renderMarkdown(text: string) {
   ));
 
   return <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>{items}</StackPanel.Vertical>;
+}
+
+function renderPlainText(text: string, isError = false) {
+  return (
+    <div
+      style={{
+        backgroundColor: isError ? '#fce8e6' : '#f8fafc',
+        border: `1px solid ${isError ? '#c5221f' : '#d5dce8'}`,
+        borderRadius: '4px',
+        color: isError ? '#8a1c16' : '#1f2937',
+        fontFamily: 'inherit',
+        fontSize: '14px',
+        lineHeight: '1.45',
+        padding: '8px 10px',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word'
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+function renderCodeBlock(text: string) {
+  return (
+    <pre
+      style={{
+        backgroundColor: '#f6f8fa',
+        border: '1px solid #d0d7de',
+        borderRadius: '4px',
+        color: '#24292f',
+        fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+        fontSize: '13px',
+        lineHeight: '1.45',
+        margin: '0',
+        overflowX: 'auto',
+        padding: '10px 12px',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word'
+      }}
+    >
+      {text || ' '}
+    </pre>
+  );
 }
 
 function parseMarkdownBlocks(text: string) {
@@ -168,24 +220,4 @@ function parseCodeFence(language: string, content: string) {
     language: normalizedLanguage,
     content: normalizedContent
   };
-}
-
-function codeLanguage(language: string) {
-  if (language === 'javascript' || language === 'js') {
-    return Code.Language.JAVASCRIPT;
-  }
-
-  if (language === 'css') {
-    return Code.Language.CSS;
-  }
-
-  if (language === 'html' || language === 'xml') {
-    return Code.Language.HTML;
-  }
-
-  if (language === 'java') {
-    return Code.Language.JAVA;
-  }
-
-  return Code.Language.TEXT;
 }

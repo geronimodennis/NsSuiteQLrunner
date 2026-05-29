@@ -853,19 +853,49 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     function RecordChatPanel(props) {
         const responseItems = [];
         if (props.error) {
-            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Code, { content: props.error, language: component.Code.Language.TEXT, background: component.Code.Background.ERROR, lineWrapping: true }) }, 'error'));
+            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: renderPlainText(props.error, true) }, 'error'));
         }
         props.messages.forEach((message, index) => {
-            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: message.role === 'assistant' ? (renderMarkdown(message.text)) : (jsxRuntime.jsx(component.Code, { content: message.text, language: component.Code.Language.TEXT, lineWrapping: true })) })] }) }, `${message.role}-${index}`));
+            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: message.role === 'assistant' ? (renderMarkdown(message.text)) : (renderPlainText(message.text)) })] }) }, `${message.role}-${index}`));
         });
-        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: props.onClose }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
     }
     function renderMarkdown(text) {
-        const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (jsxRuntime.jsx(component.Code, { content: block.content, language: codeLanguage(block.language), lineWrapping: true })) : (component.FormattedText.markdown(block.content, {
+        const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (renderCodeBlock(block.content)) : (component.FormattedText.markdown(block.content, {
                 wrap: true,
                 whitespace: true
             })) }, `markdown-${index}`)));
         return jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: items });
+    }
+    function renderPlainText(text, isError = false) {
+        return (jsxRuntime.jsx("div", { style: {
+                backgroundColor: isError ? '#fce8e6' : '#f8fafc',
+                border: `1px solid ${isError ? '#c5221f' : '#d5dce8'}`,
+                borderRadius: '4px',
+                color: isError ? '#8a1c16' : '#1f2937',
+                fontFamily: 'inherit',
+                fontSize: '14px',
+                lineHeight: '1.45',
+                padding: '8px 10px',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word'
+            }, children: text }));
+    }
+    function renderCodeBlock(text) {
+        return (jsxRuntime.jsx("pre", { style: {
+                backgroundColor: '#f6f8fa',
+                border: '1px solid #d0d7de',
+                borderRadius: '4px',
+                color: '#24292f',
+                fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                fontSize: '13px',
+                lineHeight: '1.45',
+                margin: '0',
+                overflowX: 'auto',
+                padding: '10px 12px',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word'
+            }, children: text || ' ' }));
     }
     function parseMarkdownBlocks(text) {
         const blocks = [];
@@ -913,21 +943,6 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             language: normalizedLanguage,
             content: normalizedContent
         };
-    }
-    function codeLanguage(language) {
-        if (language === 'javascript' || language === 'js') {
-            return component.Code.Language.JAVASCRIPT;
-        }
-        if (language === 'css') {
-            return component.Code.Language.CSS;
-        }
-        if (language === 'html' || language === 'xml') {
-            return component.Code.Language.HTML;
-        }
-        if (language === 'java') {
-            return component.Code.Language.JAVA;
-        }
-        return component.Code.Language.TEXT;
     }
 
     function ResultsPanel(props) {
@@ -1002,7 +1017,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                                 height: '100%',
                                 overflow: 'hidden',
                                 direction: 'ltr'
-                            }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }) }) }) }, 'record-chat'));
+                            }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onClose: () => this.closeRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }) }) }) }, 'record-chat'));
             }
             return items;
         }
@@ -1078,6 +1093,11 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         toggleRecordChat() {
             this.setState({
                 recordChatVisible: !this.state.recordChatVisible
+            });
+        }
+        closeRecordChat() {
+            this.setState({
+                recordChatVisible: false
             });
         }
         clearRecordChat() {

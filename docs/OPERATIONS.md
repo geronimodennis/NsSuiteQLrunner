@@ -49,7 +49,7 @@ Direct `runSuiteQL` mode is available for smaller queries. When direct execution
 
 ## AI Report And Schema Chat
 
-Use the Query Editor `AI Chat` action to show or hide the floating chat panel.
+Use the Query Editor `AI Chat` action to show or hide the floating chat panel. Users can also close the panel from its `Close` button without clearing the current chat transcript.
 
 The chat is powered by NetSuite's `N/llm` module through the SuiteQL Runner RESTlet. It specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL table/source names, transaction type codes, common standard fields, joins, table relationships, and schema patterns. The current Query Editor SQL is sent as context when asking AI, so users can request query fixes, explanations, improvements, troubleshooting, or optimization suggestions.
 

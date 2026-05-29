@@ -25,7 +25,7 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - Static SuiteQL and Oracle SQL hinting for common errors and dialect mismatches.
 - Query Editor autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
 - Query Editor `AI Chat` toggle that opens a floating chat panel.
-- AI chat uses the NetSuite `N/llm` module, opens in a resizable floating panel, renders Markdown responses, and includes the current Query Editor SQL as context when users ask to fix, explain, improve, or optimize a query.
+- AI chat uses the NetSuite `N/llm` module, opens in a resizable floating panel with a close button, renders Markdown responses, and includes the current Query Editor SQL as context when users ask to fix, explain, improve, or optimize a query.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
 - `Run as SuiteQLPaged` checkbox for paged execution, with unchecked direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.

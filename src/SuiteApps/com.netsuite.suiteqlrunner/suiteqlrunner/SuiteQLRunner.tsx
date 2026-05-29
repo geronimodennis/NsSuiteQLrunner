@@ -163,6 +163,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
               }}
               onAsk={() => this.askRecordChat()}
               onClear={() => this.clearRecordChat()}
+              onClose={() => this.closeRecordChat()}
               onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
             />
           </div>
@@ -263,6 +264,12 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   private toggleRecordChat() {
     this.setState({
       recordChatVisible: !this.state.recordChatVisible
+    });
+  }
+
+  private closeRecordChat() {
+    this.setState({
+      recordChatVisible: false
     });
   }
 
