@@ -6,6 +6,16 @@ The app is built as a NetSuite Single Page Application and executes queries thro
 
 ![SuiteQL Runner screenshot](docs/assets/suiteql-runner-screenshot.png)
 
+## Access In NetSuite
+
+After deployment, open SuiteQL Runner from the Classic Center navigation:
+
+```text
+Lists > Search > SuiteQLRunner: dgentic tooling
+```
+
+The center link is defined on the SPA object in `src/Objects/custspa_suiteqlrunner.xml`.
+
 ## Why Use This SuiteApp
 
 - It keeps SuiteQL work inside NetSuite, using the current user's role, permissions, and account context.
