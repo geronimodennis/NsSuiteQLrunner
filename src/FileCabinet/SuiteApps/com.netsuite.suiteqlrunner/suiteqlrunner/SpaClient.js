@@ -790,11 +790,61 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     }
 
     function QueryEditor(props) {
+        const actionableHints = getActionableHints(props.hints, props.executionError);
         const autocompleteItems = props.suggestions.slice(0, 10).map((suggestion) => (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: `${suggestion.name} - ${suggestion.type}`, action: () => props.onInsertSuggestion(suggestion) }) }, `${suggestion.type}-${suggestion.name}`)));
-        return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'AI Chat', action: props.onToggleRecordChat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Run as SuiteQLPaged', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.runAsSuiteQLPaged, action: ({ value }) => props.onRunAsSuiteQLPagedChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.pageSize, placeholder: 'Rows/page', onTextChanged: ({ text }) => props.onPageSizeChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxPages, placeholder: 'Pages', onTextChanged: ({ text }) => props.onMaxPagesChanged(text), rootStyle: { width: '90px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
-                                fontFamily: 'Consolas, Monaco, monospace',
-                                width: '100%'
-                            }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: autocompleteItems }) })] }) }));
+        const editorItems = [
+            jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'AI Chat', action: props.onToggleRecordChat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Run as SuiteQLPaged', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.runAsSuiteQLPaged, action: ({ value }) => props.onRunAsSuiteQLPagedChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.pageSize, placeholder: 'Rows/page', onTextChanged: ({ text }) => props.onPageSizeChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxPages, placeholder: 'Pages', onTextChanged: ({ text }) => props.onMaxPagesChanged(text), rootStyle: { width: '90px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped." }) })] }) }, 'controls'),
+            jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
+                        fontFamily: 'Consolas, Monaco, monospace',
+                        width: '100%'
+                    }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) }, 'query')
+        ];
+        if (actionableHints.length > 0) {
+            editorItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Hints" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: actionableHints.map((hint, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: renderHint(hint) }, `${hint.severity}-${index}`))) }) })] }) }, 'hints'));
+        }
+        editorItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: autocompleteItems }) }, 'autocomplete'));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: editorItems }) }));
+    }
+    function getActionableHints(hints, executionError) {
+        const actionableHints = (hints || []).filter((hint) => hint.severity === 'error' || hint.severity === 'warning');
+        if (!executionError) {
+            return actionableHints;
+        }
+        return [
+            {
+                severity: 'error',
+                message: 'SuiteQL execution failed.',
+                detail: executionError
+            },
+            ...actionableHints
+        ];
+    }
+    function renderHint(hint) {
+        const isError = hint.severity === 'error';
+        return (jsxRuntime.jsxs("div", { style: {
+                alignItems: 'flex-start',
+                backgroundColor: isError ? '#fce8e6' : '#fff8e1',
+                border: `1px solid ${isError ? '#c5221f' : '#f2c94c'}`,
+                borderRadius: '4px',
+                color: '#1f2937',
+                display: 'flex',
+                gap: '8px',
+                padding: '8px 10px'
+            }, children: [jsxRuntime.jsx("span", { style: {
+                        alignItems: 'center',
+                        backgroundColor: isError ? '#c5221f' : '#8a6d00',
+                        borderRadius: '50%',
+                        color: '#ffffff',
+                        display: 'inline-flex',
+                        flex: '0 0 18px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        height: '18px',
+                        justifyContent: 'center',
+                        lineHeight: '18px',
+                        marginTop: '1px',
+                        width: '18px'
+                    }, children: "!" }), jsxRuntime.jsxs("span", { style: { display: 'block', lineHeight: '1.45' }, children: [jsxRuntime.jsxs("strong", { children: [isError ? 'Error' : 'Warning', ":"] }), " ", hint.message, hint.detail ? (jsxRuntime.jsx("span", { style: { display: 'block', marginTop: '2px', whiteSpace: 'pre-wrap' }, children: hint.detail })) : null] })] }));
     }
 
     const METRICS = [
@@ -832,22 +882,11 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         };
     }
 
-    function QueryDiagnosticsPanel({ hints, performance }) {
-        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Performance Matrix & Hints', icon: core.SystemIcon.PERFORMANCE, collapsible: true, children: jsxRuntime.jsxs(component.GridPanel, { columns: ['1fr', '2fr'], gap: component.GridPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Performance Matrix" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(buildPerformanceRows(performance || {})), columns: performanceColumns() }) })] }) }), jsxRuntime.jsx(component.GridPanel.Item, { rowIndex: 0, columnIndex: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Hints" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(toHintRows(hints)), columns: hintColumns() }) })] }) })] }) }));
-    }
-    function toHintRows(hints) {
-        return hints.map((hint, index) => ({
-            id: index + 1,
-            severity: hint.severity.toUpperCase(),
-            message: hint.message,
-            detail: hint.detail
-        }));
+    function QueryDiagnosticsPanel({ performance }) {
+        return (jsxRuntime.jsx(component.Portlet, { title: 'SuiteQL Performance Matrix', icon: core.SystemIcon.PERFORMANCE, collapsible: true, children: jsxRuntime.jsx(component.DataGrid, { dataSource: new core.ArrayDataSource(buildPerformanceRows(performance || {})), columns: performanceColumns() }) }));
     }
     function performanceColumns() {
         return [textColumn('metric', 'Metric'), textColumn('value', 'Value'), textColumn('unit', 'Unit')];
-    }
-    function hintColumns() {
-        return [textColumn('severity', 'Severity'), textColumn('message', 'Message'), textColumn('detail', 'Detail')];
     }
 
     function RecordChatPanel(props) {
@@ -993,8 +1032,15 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         }
         renderLayoutItems() {
             const items = [
-                jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.ApplicationHeader, { icon: core.SystemIcon.SEARCH, title: 'SuiteQL Runner', subtitle: 'Format, inspect, execute, and measure SuiteQL' }) }, 'header'),
-                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { hints: this.state.hints, performance: this.state.performance }) })] }) }) }) }, 'main')
+                jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs("div", { style: { position: 'relative' }, children: [jsxRuntime.jsx(component.ApplicationHeader, { icon: core.SystemIcon.SEARCH, title: 'SuiteQL Runner', subtitle: 'Format, inspect, execute, and measure SuiteQL' }), jsxRuntime.jsx("a", { href: 'https://dgenticdrive.com', target: '_blank', rel: 'noopener noreferrer', style: {
+                                    color: '#5f6f89',
+                                    fontSize: '12px',
+                                    position: 'absolute',
+                                    right: '20px',
+                                    textDecoration: 'none',
+                                    top: '14px'
+                                }, children: "dgenticdrive.com" })] }) }, 'header'),
+                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { executionError: this.state.error, hints: this.state.hints, maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { performance: this.state.performance }) })] }) }) }) }, 'main')
             ];
             if (this.state.recordChatVisible) {
                 items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx("div", { style: {
@@ -1025,6 +1071,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             this.setState({
                 query,
                 caretPosition,
+                error: null,
                 hints: analyzeSuiteQL(query),
                 suggestions: getCompletions(query, caretPosition)
             });
@@ -1034,6 +1081,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             this.saveWorkingQuery(formatted);
             this.setState({
                 query: formatted,
+                error: null,
                 hints: analyzeSuiteQL(formatted),
                 suggestions: getCompletions(formatted, formatted.length),
                 caretPosition: formatted.length
@@ -1042,6 +1090,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         analyzeQuery() {
             this.saveWorkingQuery(this.state.query);
             this.setState({
+                error: null,
                 hints: analyzeSuiteQL(this.state.query),
                 suggestions: getCompletions(this.state.query, this.state.caretPosition)
             });
@@ -1051,6 +1100,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             this.setState({
                 query: replacement.query,
                 caretPosition: replacement.caret,
+                error: null,
                 hints: analyzeSuiteQL(replacement.query),
                 suggestions: getCompletions(replacement.query, replacement.caret)
             });

@@ -57,9 +57,9 @@ Path: `src/SuiteApps/com.netsuite.suiteqlrunner/suiteqlrunner/presentation`
 
 Responsibilities:
 
-- Render the editor with integrated autocomplete, hints, floating report/schema chat, performance matrix, and results.
+- Render the editor with integrated autocomplete, warning/error hints, floating report/schema chat, performance matrix, and results.
 - Convert view data into UIF component inputs such as `DataGrid` columns and `ArrayDataSource`.
-- Keep the main workflow ordered as Query Editor, Result, then the combined Performance Matrix & Hints diagnostics panel.
+- Keep the main workflow ordered as Query Editor with actionable hints, Result, then the Performance Matrix diagnostics panel.
 - Expose foldable secondary sections through UIF `Portlet` collapse controls.
 - Stay passive: panels receive props and callbacks, but do not execute SuiteQL or own business rules.
 

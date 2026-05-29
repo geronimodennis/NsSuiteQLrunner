@@ -82,11 +82,28 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   private renderLayoutItems() {
     const items = [
       <StackPanel.Item key={'header'} shrink={0}>
-        <ApplicationHeader
-          icon={SystemIcon.SEARCH}
-          title={'SuiteQL Runner'}
-          subtitle={'Format, inspect, execute, and measure SuiteQL'}
-        />
+        <div style={{position: 'relative'}}>
+          <ApplicationHeader
+            icon={SystemIcon.SEARCH}
+            title={'SuiteQL Runner'}
+            subtitle={'Format, inspect, execute, and measure SuiteQL'}
+          />
+          <a
+            href={'https://dgenticdrive.com'}
+            target={'_blank'}
+            rel={'noopener noreferrer'}
+            style={{
+              color: '#5f6f89',
+              fontSize: '12px',
+              position: 'absolute',
+              right: '20px',
+              textDecoration: 'none',
+              top: '14px'
+            }}
+          >
+            dgenticdrive.com
+          </a>
+        </div>
       </StackPanel.Item>,
       <StackPanel.Item key={'main'} grow={1}>
         <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL}>
@@ -94,6 +111,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
             <StackPanel.Vertical itemGap={StackPanel.GapSize.LARGE}>
               <StackPanel.Item>
                 <QueryEditor
+                  executionError={this.state.error}
+                  hints={this.state.hints}
                   maxPages={this.state.maxPages}
                   pageSize={this.state.pageSize}
                   query={this.state.query}
@@ -121,7 +140,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                 />
               </StackPanel.Item>
               <StackPanel.Item>
-                <QueryDiagnosticsPanel hints={this.state.hints} performance={this.state.performance} />
+                <QueryDiagnosticsPanel performance={this.state.performance} />
               </StackPanel.Item>
             </StackPanel.Vertical>
           </ContentPanel>
@@ -178,6 +197,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     this.setState({
       query,
       caretPosition,
+      error: null,
       hints: analyzeSuiteQL(query),
       suggestions: getCompletions(query, caretPosition)
     });
@@ -189,6 +209,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
 
     this.setState({
       query: formatted,
+      error: null,
       hints: analyzeSuiteQL(formatted),
       suggestions: getCompletions(formatted, formatted.length),
       caretPosition: formatted.length
@@ -199,6 +220,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     this.saveWorkingQuery(this.state.query);
 
     this.setState({
+      error: null,
       hints: analyzeSuiteQL(this.state.query),
       suggestions: getCompletions(this.state.query, this.state.caretPosition)
     });
@@ -210,6 +232,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     this.setState({
       query: replacement.query,
       caretPosition: replacement.caret,
+      error: null,
       hints: analyzeSuiteQL(replacement.query),
       suggestions: getCompletions(replacement.query, replacement.caret)
     });

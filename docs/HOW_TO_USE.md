@@ -22,9 +22,9 @@ Use `Format SuiteQL` to clean up keyword casing and line breaks. Use `Analyze` t
 
 Autocomplete suggestions appear inside Query Editor and include known SuiteQL and Oracle SQL language constructs such as clauses, functions, built-ins, pseudo-columns, and bind variables.
 
-Hints are advisory. They can flag likely issues, but they do not block `Run SuiteQL`. NetSuite remains the final source of truth and returns execution errors in the Result panel.
+Hints are advisory. They can flag likely issues, but they do not block `Run SuiteQL`. Warning and error hints appear directly under Query Editor. Informational hints stay hidden to save space.
 
-The combined SuiteQL Performance Matrix & Hints panel is collapsible, so you can fold it while focusing on the editor and query results.
+NetSuite remains the final source of truth. If `Run SuiteQL` fails, the execution error appears in the Query Editor hint section.
 
 ## 4. Choose Execution Mode
 
@@ -44,9 +44,10 @@ Select `Run SuiteQL`.
 After execution, review:
 
 - `Result`: returned rows or the NetSuite execution error.
-- `SuiteQL Performance Matrix & Hints`: API used, latency, server time, row counts, page counts, truncation, governance usage, and local query guidance.
+- `SuiteQL Hints`: local warnings/errors and any SuiteQL execution error directly under Query Editor.
+- `SuiteQL Performance Matrix`: API used, latency, server time, row counts, page counts, truncation, and governance usage.
 
-The Result panel appears directly below Query Editor. Result and SuiteQL Performance Matrix & Hints can be collapsed or expanded from their panel headers.
+The Result panel appears directly below Query Editor. Result and SuiteQL Performance Matrix can be collapsed or expanded from their panel headers.
 
 ## 6. Ask AI About Reports, Searches, And Records
 
