@@ -861,7 +861,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
     }
     function renderMarkdown(text) {
-        const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (jsxRuntime.jsx(component.Code, { content: block.content, language: codeLanguage(block.language), background: component.Code.Background.THEME, lineWrapping: true })) : (component.FormattedText.markdown(block.content, {
+        const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (jsxRuntime.jsx(component.Code, { content: block.content, language: codeLanguage(block.language), lineWrapping: true })) : (component.FormattedText.markdown(block.content, {
                 wrap: true,
                 whitespace: true
             })) }, `markdown-${index}`)));
@@ -881,10 +881,11 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                     language: ''
                 });
             }
+            const parsedCode = parseCodeFence(match[1], match[2]);
             blocks.push({
                 type: 'code',
-                content: match[2].trim(),
-                language: String(match[1] || '').toLowerCase()
+                content: parsedCode.content,
+                language: parsedCode.language
             });
             cursor = match.index + match[0].length;
         }
@@ -897,6 +898,21 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             });
         }
         return blocks;
+    }
+    function parseCodeFence(language, content) {
+        const normalizedLanguage = String(language || '').trim().toLowerCase();
+        const normalizedContent = String(content || '').trim();
+        const sameLineLanguageMatch = normalizedContent.match(/^(sql|javascript|js|css|html|xml|java)\s+([\s\S]+)$/i);
+        if (!normalizedLanguage && sameLineLanguageMatch) {
+            return {
+                language: sameLineLanguageMatch[1].toLowerCase(),
+                content: sameLineLanguageMatch[2].trim()
+            };
+        }
+        return {
+            language: normalizedLanguage,
+            content: normalizedContent
+        };
     }
     function codeLanguage(language) {
         if (language === 'javascript' || language === 'js') {
@@ -966,7 +982,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { hints: this.state.hints, performance: this.state.performance }) })] }) }) }) }, 'main')
             ];
             if (this.state.recordChatVisible) {
-                items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {
+                items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx("div", { style: {
                             position: 'fixed',
                             right: '32px',
                             top: '84px',
@@ -976,10 +992,17 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                             minHeight: '360px',
                             maxHeight: 'calc(100vh - 108px)',
                             resize: 'both',
+                            direction: 'rtl',
+                            writingMode: 'horizontal-tb',
                             overflow: 'hidden',
                             zIndex: '1000',
                             boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
-                        }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }) }) }, 'record-chat'));
+                        }, children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {
+                                width: '100%',
+                                height: '100%',
+                                overflow: 'hidden',
+                                direction: 'ltr'
+                            }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }) }) }) }, 'record-chat'));
             }
             return items;
         }

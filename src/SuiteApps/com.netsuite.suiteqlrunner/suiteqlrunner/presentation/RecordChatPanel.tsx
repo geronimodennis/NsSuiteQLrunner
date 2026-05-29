@@ -98,7 +98,7 @@ function renderMarkdown(text: string) {
   const items = parseMarkdownBlocks(text).map((block, index) => (
     <StackPanel.Item key={`markdown-${index}`}>
       {block.type === 'code' ? (
-        <Code content={block.content} language={codeLanguage(block.language)} background={Code.Background.THEME} lineWrapping={true} />
+        <Code content={block.content} language={codeLanguage(block.language)} lineWrapping={true} />
       ) : (
         FormattedText.markdown(block.content, {
           wrap: true,
@@ -128,10 +128,12 @@ function parseMarkdownBlocks(text: string) {
       });
     }
 
+    const parsedCode = parseCodeFence(match[1], match[2]);
+
     blocks.push({
       type: 'code',
-      content: match[2].trim(),
-      language: String(match[1] || '').toLowerCase()
+      content: parsedCode.content,
+      language: parsedCode.language
     });
 
     cursor = match.index + match[0].length;
@@ -148,6 +150,24 @@ function parseMarkdownBlocks(text: string) {
   }
 
   return blocks;
+}
+
+function parseCodeFence(language: string, content: string) {
+  const normalizedLanguage = String(language || '').trim().toLowerCase();
+  const normalizedContent = String(content || '').trim();
+  const sameLineLanguageMatch = normalizedContent.match(/^(sql|javascript|js|css|html|xml|java)\s+([\s\S]+)$/i);
+
+  if (!normalizedLanguage && sameLineLanguageMatch) {
+    return {
+      language: sameLineLanguageMatch[1].toLowerCase(),
+      content: sameLineLanguageMatch[2].trim()
+    };
+  }
+
+  return {
+    language: normalizedLanguage,
+    content: normalizedContent
+  };
 }
 
 function codeLanguage(language: string) {

@@ -132,12 +132,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     if (this.state.recordChatVisible) {
       items.push(
         <StackPanel.Item key={'record-chat'} shrink={0} basis={'0px'}>
-          <RecordChatPanel
-            draft={this.state.recordChatDraft}
-            error={this.state.recordChatError}
-            messages={this.state.recordChatMessages}
-            running={this.state.recordChatRunning}
-            rootStyle={{
+          <div
+            style={{
               position: 'fixed',
               right: '32px',
               top: '84px',
@@ -147,14 +143,29 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
               minHeight: '360px',
               maxHeight: 'calc(100vh - 108px)',
               resize: 'both',
+              direction: 'rtl',
+              writingMode: 'horizontal-tb',
               overflow: 'hidden',
               zIndex: '1000',
               boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
             }}
-            onAsk={() => this.askRecordChat()}
-            onClear={() => this.clearRecordChat()}
-            onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
-          />
+          >
+            <RecordChatPanel
+              draft={this.state.recordChatDraft}
+              error={this.state.recordChatError}
+              messages={this.state.recordChatMessages}
+              running={this.state.recordChatRunning}
+              rootStyle={{
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden',
+                direction: 'ltr'
+              }}
+              onAsk={() => this.askRecordChat()}
+              onClear={() => this.clearRecordChat()}
+              onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
+            />
+          </div>
         </StackPanel.Item>
       );
     }
