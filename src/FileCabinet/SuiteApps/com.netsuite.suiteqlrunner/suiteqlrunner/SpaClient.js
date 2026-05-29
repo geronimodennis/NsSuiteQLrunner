@@ -861,10 +861,57 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
     }
     function renderMarkdown(text) {
-        return component.FormattedText.markdown(text, {
-            wrap: true,
-            whitespace: true
-        });
+        const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (jsxRuntime.jsx(component.Code, { content: block.content, language: codeLanguage(block.language), background: component.Code.Background.THEME, lineWrapping: true })) : (component.FormattedText.markdown(block.content, {
+                wrap: true,
+                whitespace: true
+            })) }, `markdown-${index}`)));
+        return jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: items });
+    }
+    function parseMarkdownBlocks(text) {
+        const blocks = [];
+        const pattern = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+        let cursor = 0;
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+            const prose = text.slice(cursor, match.index).trim();
+            if (prose) {
+                blocks.push({
+                    type: 'markdown',
+                    content: prose,
+                    language: ''
+                });
+            }
+            blocks.push({
+                type: 'code',
+                content: match[2].trim(),
+                language: String(match[1] || '').toLowerCase()
+            });
+            cursor = match.index + match[0].length;
+        }
+        const trailing = text.slice(cursor).trim();
+        if (trailing || blocks.length === 0) {
+            blocks.push({
+                type: 'markdown',
+                content: trailing || text,
+                language: ''
+            });
+        }
+        return blocks;
+    }
+    function codeLanguage(language) {
+        if (language === 'javascript' || language === 'js') {
+            return component.Code.Language.JAVASCRIPT;
+        }
+        if (language === 'css') {
+            return component.Code.Language.CSS;
+        }
+        if (language === 'html' || language === 'xml') {
+            return component.Code.Language.HTML;
+        }
+        if (language === 'java') {
+            return component.Code.Language.JAVA;
+        }
+        return component.Code.Language.TEXT;
     }
 
     function ResultsPanel(props) {
@@ -925,6 +972,10 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                             top: '84px',
                             width: '440px',
                             height: 'calc(100vh - 108px)',
+                            minWidth: '360px',
+                            minHeight: '360px',
+                            maxHeight: 'calc(100vh - 108px)',
+                            resize: 'both',
                             overflow: 'hidden',
                             zIndex: '1000',
                             boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'

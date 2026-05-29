@@ -95,8 +95,77 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
 }
 
 function renderMarkdown(text: string) {
-  return FormattedText.markdown(text, {
-    wrap: true,
-    whitespace: true
-  });
+  const items = parseMarkdownBlocks(text).map((block, index) => (
+    <StackPanel.Item key={`markdown-${index}`}>
+      {block.type === 'code' ? (
+        <Code content={block.content} language={codeLanguage(block.language)} background={Code.Background.THEME} lineWrapping={true} />
+      ) : (
+        FormattedText.markdown(block.content, {
+          wrap: true,
+          whitespace: true
+        })
+      )}
+    </StackPanel.Item>
+  ));
+
+  return <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>{items}</StackPanel.Vertical>;
+}
+
+function parseMarkdownBlocks(text: string) {
+  const blocks = [];
+  const pattern = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    const prose = text.slice(cursor, match.index).trim();
+
+    if (prose) {
+      blocks.push({
+        type: 'markdown',
+        content: prose,
+        language: ''
+      });
+    }
+
+    blocks.push({
+      type: 'code',
+      content: match[2].trim(),
+      language: String(match[1] || '').toLowerCase()
+    });
+
+    cursor = match.index + match[0].length;
+  }
+
+  const trailing = text.slice(cursor).trim();
+
+  if (trailing || blocks.length === 0) {
+    blocks.push({
+      type: 'markdown',
+      content: trailing || text,
+      language: ''
+    });
+  }
+
+  return blocks;
+}
+
+function codeLanguage(language: string) {
+  if (language === 'javascript' || language === 'js') {
+    return Code.Language.JAVASCRIPT;
+  }
+
+  if (language === 'css') {
+    return Code.Language.CSS;
+  }
+
+  if (language === 'html' || language === 'xml') {
+    return Code.Language.HTML;
+  }
+
+  if (language === 'java') {
+    return Code.Language.JAVA;
+  }
+
+  return Code.Language.TEXT;
 }

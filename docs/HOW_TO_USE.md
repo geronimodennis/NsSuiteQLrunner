@@ -50,7 +50,7 @@ The Result panel appears directly below Query Editor. Result and SuiteQL Perform
 
 ## 6. Ask AI About Reports, Searches, And Records
 
-Select `AI Chat` in the Query Editor controls to show or hide the floating chat panel.
+Select `AI Chat` in the Query Editor controls to show or hide the floating chat panel. The panel can be resized from its lower corner when you need more room for the conversation or generated SQL.
 
 Use it for questions like:
 
@@ -66,7 +66,7 @@ Which saved search type should I start from for invoice line reporting, and what
 
 The AI chat specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL source names, transaction type codes, common standard fields, joins, and table relationships. It can also use the current Query Editor SQL as context when you ask it to fix, explain, improve, troubleshoot, or optimize the query.
 
-AI responses support Markdown, including bullets and fenced SQL examples.
+AI responses support Markdown, including bullets and fenced SQL examples. Fenced code blocks render as separate code boxes.
 
 It can still answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the workflow.
 
