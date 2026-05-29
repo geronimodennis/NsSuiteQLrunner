@@ -84,20 +84,6 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
           icon={SystemIcon.SEARCH}
           title={'SuiteQL Runner'}
           subtitle={'Format, inspect, execute, and measure SuiteQL'}
-          actions={[
-            {
-              label: 'Run SuiteQL',
-              action: () => this.runQuery()
-            },
-            {
-              label: 'Format',
-              action: () => this.formatQuery()
-            },
-            {
-              label: 'AI Chat',
-              action: () => this.toggleRecordChat()
-            }
-          ]}
         />
       </StackPanel.Item>,
       <StackPanel.Item key={'main'} grow={1}>
@@ -120,6 +106,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                     this.setState({executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL'})
                   }
                   onRun={() => this.runQuery()}
+                  onToggleRecordChat={() => this.toggleRecordChat()}
                 />
               </StackPanel.Item>
               <StackPanel.Item>

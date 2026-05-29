@@ -66,7 +66,7 @@ The Result panel appears directly below Query Editor. Result, SuiteQL Performanc
 
 ## 6. Ask AI About Reports, Searches, And Records
 
-Select `AI Chat` in the header to show or hide the floating chat panel below the button.
+Select `AI Chat` in the Query Editor controls to show or hide the floating chat panel.
 
 Use it for questions like:
 

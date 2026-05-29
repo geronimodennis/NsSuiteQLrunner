@@ -11,7 +11,7 @@ It should not be exposed as a broad reporting portal.
 1. Enter SuiteQL in the editor.
 2. Use Format to normalize keyword casing and clause layout.
 3. Review hints for likely SuiteQL or Oracle SQL issues.
-4. Select `AI Chat` in the header when you need help with reports, saved searches, standard NetSuite record type IDs, SuiteQL sources, transaction type codes, joins, table relationships, or schema patterns.
+4. Select `AI Chat` in the Query Editor when you need help with reports, saved searches, standard NetSuite record type IDs, SuiteQL sources, transaction type codes, joins, table relationships, or schema patterns.
 5. Check `Run as SuiteQLPaged` for paged execution, or leave it unchecked for direct `runSuiteQL`.
 6. Set rows per page and max pages.
 7. Run SuiteQL.
@@ -49,7 +49,7 @@ Direct `runSuiteQL` mode is available for smaller queries. When direct execution
 
 ## AI Report And Schema Chat
 
-Use the header `AI Chat` action to show or hide the floating chat panel below the button.
+Use the Query Editor `AI Chat` action to show or hide the floating chat panel.
 
 The chat is powered by NetSuite's `N/llm` module through the SuiteQL Runner RESTlet. It specializes in reports, saved searches, standard NetSuite record type IDs, SuiteQL table/source names, transaction type codes, common standard fields, joins, table relationships, and schema patterns.
 

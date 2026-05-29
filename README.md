@@ -19,11 +19,11 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 
 ## Features
 
-- SuiteQL editor with Run, Analyze, and Format actions.
+- SuiteQL editor with Run, Format, Analyze, and AI Chat actions.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.
 - Static SuiteQL and Oracle SQL hinting for common errors and dialect mismatches.
 - Query autocomplete for known SuiteQL and Oracle SQL clauses, keywords, functions, built-ins, pseudo-columns, and bind variables.
-- Header `AI Chat` toggle that opens a floating chat panel below the header action.
+- Query Editor `AI Chat` toggle that opens a floating chat panel.
 - AI chat uses the NetSuite `N/llm` module and specializes in reports, saved searches, standard record type IDs, SuiteQL sources, transaction type codes, standard fields, joins, and table relationships, while still allowing broader NetSuite and SuiteQL questions.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.

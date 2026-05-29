@@ -97,7 +97,7 @@ This keeps SuiteScript deployment simple while preserving clean code boundaries.
 
 ## AI Report And Schema Chat Flow
 
-The SPA header includes an `AI Chat` action after `Format`. Clicking it toggles a floating chat panel below the header action area.
+The Query Editor includes the query workflow actions: `Run SuiteQL`, `Format SuiteQL`, `Analyze`, and `AI Chat`. Clicking `AI Chat` toggles a floating chat panel while keeping the page header free of action buttons.
 
 The chat request is sent to the same RESTlet with action `CHAT_RECORDS`. The RESTlet uses `N/llm.generateText` with a reporting/search/schema preamble, concise chat history, and source documents that describe standard record ID patterns, common SuiteQL join patterns, report/search guidance, and frequently used standard record families.
 

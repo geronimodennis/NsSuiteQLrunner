@@ -14,6 +14,7 @@ interface QueryEditorProps {
   onQueryChanged: (query: string, caretPosition: number) => void;
   onRunAsSuiteQLPagedChanged: (value: boolean) => void;
   onRun: () => void;
+  onToggleRecordChat: () => void;
 }
 
 export function QueryEditor(props: QueryEditorProps) {
@@ -34,6 +35,9 @@ export function QueryEditor(props: QueryEditorProps) {
             </StackPanel.Item>
             <StackPanel.Item shrink={0}>
               <Button label={'Analyze'} action={props.onAnalyze} />
+            </StackPanel.Item>
+            <StackPanel.Item shrink={0}>
+              <Button label={'AI Chat'} action={props.onToggleRecordChat} />
             </StackPanel.Item>
             <StackPanel.Item shrink={0}>
               <CheckBox
