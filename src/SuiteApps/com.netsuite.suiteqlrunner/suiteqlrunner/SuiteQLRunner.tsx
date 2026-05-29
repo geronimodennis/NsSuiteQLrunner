@@ -72,103 +72,114 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   render() {
     return (
       <ThemeSelector supportedThemes={[Theme.Name.REDWOOD, Theme.Name.REFRESHED]}>
-        <StackPanel.Vertical rootStyle={{height: '100%'}}>
-          <StackPanel.Item shrink={0}>
-            <ApplicationHeader
-              icon={SystemIcon.SEARCH}
-              title={'SuiteQL Runner'}
-              subtitle={'Format, inspect, execute, and measure SuiteQL'}
-              actions={[
-                {
-                  label: 'Run SuiteQL',
-                  action: () => this.runQuery()
-                },
-                {
-                  label: 'Format',
-                  action: () => this.formatQuery()
-                },
-                {
-                  label: 'AI Chat',
-                  action: () => this.toggleRecordChat()
-                }
-              ]}
-            />
-          </StackPanel.Item>
-          <StackPanel.Item grow={1}>
-            <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL}>
-              <ContentPanel outerGap={ContentPanel.GapSize.LARGE}>
-                <StackPanel.Vertical itemGap={StackPanel.GapSize.LARGE}>
-                  <StackPanel.Item>
-                    <QueryEditor
-                      maxPages={this.state.maxPages}
-                      pageSize={this.state.pageSize}
-                      query={this.state.query}
-                      runAsSuiteQLPaged={this.state.executionMode === 'RUN_SUITEQL_PAGED'}
-                      running={this.state.running}
-                      onAnalyze={() => this.analyzeQuery()}
-                      onFormat={() => this.formatQuery()}
-                      onMaxPagesChanged={(maxPages) => this.setState({maxPages})}
-                      onPageSizeChanged={(pageSize) => this.setState({pageSize})}
-                      onQueryChanged={(query, caretPosition) => this.onQueryChanged(query, caretPosition)}
-                      onRunAsSuiteQLPagedChanged={(runAsSuiteQLPaged) =>
-                        this.setState({executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL'})
-                      }
-                      onRun={() => this.runQuery()}
-                    />
-                  </StackPanel.Item>
-                  <StackPanel.Item>{this.renderAnalysisAndSuggestions()}</StackPanel.Item>
-                  <StackPanel.Item>
-                    <PerformanceMatrixPanel performance={this.state.performance} />
-                  </StackPanel.Item>
-                  <StackPanel.Item>
-                    <ResultsPanel
-                      columns={this.state.resultColumns}
-                      error={this.state.error}
-                      rows={this.state.resultRows}
-                    />
-                  </StackPanel.Item>
-                </StackPanel.Vertical>
-              </ContentPanel>
-            </ScrollPanel>
-          </StackPanel.Item>
-          {this.state.recordChatVisible ? (
-            <StackPanel.Item shrink={0} basis={'0px'}>
-              <RecordChatPanel
-                draft={this.state.recordChatDraft}
-                error={this.state.recordChatError}
-                messages={this.state.recordChatMessages}
-                running={this.state.recordChatRunning}
-                rootStyle={{
-                  position: 'fixed',
-                  right: '32px',
-                  top: '84px',
-                  width: '440px',
-                  maxHeight: 'calc(100vh - 108px)',
-                  overflowY: 'auto',
-                  zIndex: '1000',
-                  boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
-                }}
-                onAsk={() => this.askRecordChat()}
-                onClear={() => this.clearRecordChat()}
-                onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
-              />
-            </StackPanel.Item>
-          ) : null}
-        </StackPanel.Vertical>
+        <StackPanel.Vertical rootStyle={{height: '100%'}}>{this.renderLayoutItems()}</StackPanel.Vertical>
       </ThemeSelector>
     );
   }
 
+  private renderLayoutItems() {
+    const items = [
+      <StackPanel.Item key={'header'} shrink={0}>
+        <ApplicationHeader
+          icon={SystemIcon.SEARCH}
+          title={'SuiteQL Runner'}
+          subtitle={'Format, inspect, execute, and measure SuiteQL'}
+          actions={[
+            {
+              label: 'Run SuiteQL',
+              action: () => this.runQuery()
+            },
+            {
+              label: 'Format',
+              action: () => this.formatQuery()
+            },
+            {
+              label: 'AI Chat',
+              action: () => this.toggleRecordChat()
+            }
+          ]}
+        />
+      </StackPanel.Item>,
+      <StackPanel.Item key={'main'} grow={1}>
+        <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL}>
+          <ContentPanel outerGap={ContentPanel.GapSize.LARGE}>
+            <StackPanel.Vertical itemGap={StackPanel.GapSize.LARGE}>
+              <StackPanel.Item>
+                <QueryEditor
+                  maxPages={this.state.maxPages}
+                  pageSize={this.state.pageSize}
+                  query={this.state.query}
+                  runAsSuiteQLPaged={this.state.executionMode === 'RUN_SUITEQL_PAGED'}
+                  running={this.state.running}
+                  onAnalyze={() => this.analyzeQuery()}
+                  onFormat={() => this.formatQuery()}
+                  onMaxPagesChanged={(maxPages) => this.setState({maxPages})}
+                  onPageSizeChanged={(pageSize) => this.setState({pageSize})}
+                  onQueryChanged={(query, caretPosition) => this.onQueryChanged(query, caretPosition)}
+                  onRunAsSuiteQLPagedChanged={(runAsSuiteQLPaged) =>
+                    this.setState({executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL'})
+                  }
+                  onRun={() => this.runQuery()}
+                />
+              </StackPanel.Item>
+              <StackPanel.Item>{this.renderAnalysisAndSuggestions()}</StackPanel.Item>
+              <StackPanel.Item>
+                <PerformanceMatrixPanel performance={this.state.performance} />
+              </StackPanel.Item>
+              <StackPanel.Item>
+                <ResultsPanel
+                  columns={this.state.resultColumns}
+                  error={this.state.error}
+                  rows={this.state.resultRows}
+                />
+              </StackPanel.Item>
+            </StackPanel.Vertical>
+          </ContentPanel>
+        </ScrollPanel>
+      </StackPanel.Item>
+    ];
+
+    if (this.state.recordChatVisible) {
+      items.push(
+        <StackPanel.Item key={'record-chat'} shrink={0} basis={'0px'}>
+          <RecordChatPanel
+            draft={this.state.recordChatDraft}
+            error={this.state.recordChatError}
+            messages={this.state.recordChatMessages}
+            running={this.state.recordChatRunning}
+            rootStyle={{
+              position: 'fixed',
+              right: '32px',
+              top: '84px',
+              width: '440px',
+              maxHeight: 'calc(100vh - 108px)',
+              overflowY: 'auto',
+              zIndex: '1000',
+              boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
+            }}
+            onAsk={() => this.askRecordChat()}
+            onClear={() => this.clearRecordChat()}
+            onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
+          />
+        </StackPanel.Item>
+      );
+    }
+
+    return items;
+  }
+
   private renderAnalysisAndSuggestions() {
     return (
-      <GridPanel columns={['2fr', '1fr']} gap={GridPanel.GapSize.LARGE}>
-        <GridPanel.Item rowIndex={0} columnIndex={0}>
-          <QueryHintsPanel hints={this.state.hints} />
-        </GridPanel.Item>
-        <GridPanel.Item rowIndex={0} columnIndex={1}>
-          <AutocompletePanel suggestions={this.state.suggestions} onInsert={(suggestion) => this.insertSuggestion(suggestion)} />
-        </GridPanel.Item>
-      </GridPanel>
+      <div style={{width: '100%'}}>
+        <GridPanel columns={['2fr', '1fr']} gap={GridPanel.GapSize.LARGE}>
+          <GridPanel.Item rowIndex={0} columnIndex={0}>
+            <QueryHintsPanel hints={this.state.hints} />
+          </GridPanel.Item>
+          <GridPanel.Item rowIndex={0} columnIndex={1}>
+            <AutocompletePanel suggestions={this.state.suggestions} onInsert={(suggestion) => this.insertSuggestion(suggestion)} />
+          </GridPanel.Item>
+        </GridPanel>
+      </div>
     );
   }
 
