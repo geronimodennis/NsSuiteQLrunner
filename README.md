@@ -30,7 +30,7 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 ## Features
 
 - SuiteQL editor with Run, Format, Analyze, and AI Chat actions.
-- Chrome-style Query Editor tabs for working on multiple SuiteQL drafts, each with its own Result and SuiteQL Performance Matrix state.
+- Chrome-style Query Editor tabs for working on multiple SuiteQL drafts, each with its own Result and SuiteQL Performance Matrix state. Use the add icon to create a tab, hover a tab to rename it with the edit/check icons, or close it with the tab `X`.
 - Query Editor history for loading, deleting, or clearing saved query-version checkpoints.
 - Blank editor on first use, with automatic restore of the last query saved by Run, Format, or Analyze.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.

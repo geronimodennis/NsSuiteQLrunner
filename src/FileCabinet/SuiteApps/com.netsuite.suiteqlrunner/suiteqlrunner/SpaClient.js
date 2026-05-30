@@ -987,10 +987,13 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     function QueryEditor(props) {
         const actionableHints = getActionableHints(props.hints, props.executionError);
         const autocompleteItems = props.suggestions.slice(0, 10).map((suggestion) => (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: `${suggestion.name} - ${suggestion.type}`, action: () => props.onInsertSuggestion(suggestion) }) }, `${suggestion.type}-${suggestion.name}`)));
+        const autocompleteStackItems = autocompleteItems.length > 0 ? autocompleteItems : [
+            jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("div", { style: { display: 'none' } }) }, 'empty-autocomplete')
+        ];
         return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'AI Chat', action: props.onToggleRecordChat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Run as SuiteQLPaged', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.runAsSuiteQLPaged, action: ({ value }) => props.onRunAsSuiteQLPagedChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.pageSize, placeholder: 'Rows/page', onTextChanged: ({ text }) => props.onPageSizeChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxPages, placeholder: 'Pages', onTextChanged: ({ text }) => props.onMaxPagesChanged(text), rootStyle: { width: '90px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
                                 fontFamily: 'Consolas, Monaco, monospace',
                                 width: '100%'
-                            }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: actionableHints.length > 0 ? (jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Hints" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: actionableHints.map((hint, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: renderHint(hint) }, `${hint.severity}-${index}`))) }) })] })) : (jsxRuntime.jsx("div", { style: { display: 'none' } })) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: autocompleteItems.length > 0 ? autocompleteItems : jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("div", { style: { display: 'none' } }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Editor History', icon: core.SystemIcon.LIST, action: props.onToggleHistory }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: props.historyVisible ? renderHistoryPanel(props) : jsxRuntime.jsx("div", { style: { display: 'none' } }) })] }) }));
+                            }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: actionableHints.length > 0 ? (jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Hints" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: actionableHints.map((hint, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: renderHint(hint) }, `${hint.severity}-${index}`))) }) })] })) : (jsxRuntime.jsx("div", { style: { display: 'none' } })) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: autocompleteStackItems }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Editor History', icon: core.SystemIcon.LIST, action: props.onToggleHistory }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: props.historyVisible ? renderHistoryPanel(props) : jsxRuntime.jsx("div", { style: { display: 'none' } }) })] }) }));
     }
     function renderHistoryPanel(props) {
         const historyItems = props.historyItems.map((item) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx("div", { style: {
@@ -998,11 +1001,14 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                     borderRadius: '4px',
                     padding: '8px'
                 }, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { children: item.title }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: formatHistoryDate$1(item.updatedAt) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Load', action: () => props.onLoadHistoryItem(item.id) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Delete', action: () => props.onDeleteHistoryItem(item.id) }) })] }) })] }) }) }, item.id)));
+        const queryHistoryItems = historyItems.length > 0 ? historyItems : [
+            jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No query history yet." }) }, 'empty-query-history')
+        ];
         return (jsxRuntime.jsx("div", { style: {
                 border: '1px solid #d5dce8',
                 borderRadius: '4px',
                 padding: '10px'
-            }, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Query Editor History" }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear All', action: props.onClearHistory }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { maxHeight: '220px' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: historyItems.length > 0 ? historyItems : jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No query history yet." }) }) }) }) })] }) }));
+            }, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Query Editor History" }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear All', action: props.onClearHistory }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { maxHeight: '220px' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: queryHistoryItems }) }) })] }) }));
     }
     function formatHistoryDate$1(value) {
         const date = new Date(value);
@@ -1103,7 +1109,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         props.messages.forEach((message, index) => {
             responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: message.role === 'assistant' ? (renderMarkdown(message.text, props.merging, props.onInsertSuiteQL, props.onMergeSuiteQL)) : (renderPlainText(message.text)) })] }) }, `${message.role}-${index}`));
         });
-        return (jsxRuntime.jsxs("div", { style: { height: '100%', position: 'relative' }, children: [jsxRuntime.jsx("div", { style: { position: 'absolute', right: '16px', top: '12px', zIndex: '1' }, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: props.onClose }) }), jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, wrap: true, wrapGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("span", { title: 'Chat History', children: jsxRuntime.jsx(component.Button, { label: 'History', icon: core.SystemIcon.LIST, action: props.onToggleHistory }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Use AI query merging', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.useAiQueryMerge, action: ({ value }) => props.onUseAiQueryMergeChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Merge to Current Query may use NetSuite AI tokens." }) })] }) })] }) })] }) })] }));
+        return (jsxRuntime.jsxs("div", { style: { height: '100%', position: 'relative' }, children: [jsxRuntime.jsx("div", { style: { position: 'absolute', right: '16px', top: '12px', zIndex: '1' }, children: jsxRuntime.jsx("div", { title: 'Close', children: jsxRuntime.jsx(component.Button, { label: null, icon: core.SystemIcon.CLOSE, action: props.onClose }) }) }), jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, wrap: true, wrapGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("span", { title: 'Chat History', children: jsxRuntime.jsx(component.Button, { label: 'History', icon: core.SystemIcon.LIST, action: props.onToggleHistory }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Use AI query merging', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.useAiQueryMerge, action: ({ value }) => props.onUseAiQueryMergeChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Merge to Current Query may use NetSuite AI tokens." }) })] }) })] }) })] }) })] }));
     }
     function renderMarkdown(text, merging, onInsertSuiteQL, onMergeSuiteQL) {
         const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (renderCodeBlock(block.content, block.language, merging, onInsertSuiteQL, onMergeSuiteQL)) : (component.FormattedText.markdown(block.content, {
@@ -1227,6 +1233,8 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 queryHistory: this.loadQueryHistory(),
                 queryHistoryVisible: false,
                 queryTabs: [initialTab],
+                editingQueryTabId: null,
+                editingQueryTabTitle: '',
                 hints: analyzeSuiteQL(workingQuery),
                 suggestions: getCompletions(workingQuery, workingQuery.length),
                 resultRows: [],
@@ -1256,15 +1264,32 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         }
         renderLayoutItems() {
             const items = [
-                jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs("div", { style: { position: 'relative' }, children: [jsxRuntime.jsx(component.ApplicationHeader, { icon: core.SystemIcon.SEARCH, title: 'SuiteQL Runner', subtitle: 'Format, inspect, execute, and measure SuiteQL' }), jsxRuntime.jsx("a", { href: 'https://dgenticdrive.com', target: '_blank', rel: 'noopener noreferrer', style: {
+                jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs("div", { style: { position: 'relative' }, children: [jsxRuntime.jsx("style", { children: `
+              .nsqlr-query-tab-close {
+                opacity: 0;
+                transition: opacity 120ms ease;
+              }
+
+              .nsqlr-query-tab-edit {
+                opacity: 0;
+                transition: opacity 120ms ease;
+              }
+
+              .nsqlr-query-tab:hover .nsqlr-query-tab-close,
+              .nsqlr-query-tab:focus-within .nsqlr-query-tab-close,
+              .nsqlr-query-tab:hover .nsqlr-query-tab-edit,
+              .nsqlr-query-tab:focus-within .nsqlr-query-tab-edit {
+                opacity: 1;
+              }
+            ` }), jsxRuntime.jsx(component.ApplicationHeader, { icon: core.SystemIcon.SEARCH, title: 'SuiteQL Runner', subtitle: 'Format, inspect, execute, and measure SuiteQL' }), jsxRuntime.jsx("a", { href: 'https://dgenticdrive.com', target: '_blank', rel: 'noopener noreferrer', style: {
                                     color: '#5f6f89',
                                     fontSize: '12px',
                                     position: 'absolute',
                                     right: '20px',
                                     textDecoration: 'none',
                                     top: '14px'
-                                }, children: "dgenticdrive.com" })] }) }, 'header'),
-                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderQueryTabs() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { executionError: this.state.error, hints: this.state.hints, historyItems: this.state.queryHistory, historyVisible: this.state.queryHistoryVisible, maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onClearHistory: () => this.clearQueryHistory(), onDeleteHistoryItem: (id) => this.deleteQueryHistoryItem(id), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onLoadHistoryItem: (id) => this.loadQueryHistoryItem(id), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleHistory: () => this.toggleQueryHistory(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { performance: this.state.performance }) })] }) }) }) }, 'main')
+                                }, children: "dgenticdrive.com" }), jsxRuntime.jsx("div", { style: { padding: '0 20px 12px' }, children: this.renderQueryTabs() })] }) }, 'header'),
+                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { executionError: this.state.error, hints: this.state.hints, historyItems: this.state.queryHistory, historyVisible: this.state.queryHistoryVisible, maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onClearHistory: () => this.clearQueryHistory(), onDeleteHistoryItem: (id) => this.deleteQueryHistoryItem(id), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onLoadHistoryItem: (id) => this.loadQueryHistoryItem(id), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleHistory: () => this.toggleQueryHistory(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { performance: this.state.performance }) })] }) }) }) }, 'main')
             ];
             if (this.state.recordChatVisible) {
                 items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx("div", { style: {
@@ -1304,8 +1329,54 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             return items;
         }
         renderQueryTabs() {
-            const tabItems = this.state.queryTabs.map((tab) => (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: `<> ${tab.title}`, type: tab.id === this.state.activeQueryTabId ? component.Button.Type.PRIMARY : component.Button.Type.DEFAULT, action: () => this.activateQueryTab(tab.id) }) }, tab.id)));
-            return (jsxRuntime.jsxs(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: [tabItems, jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'New Tab', action: () => this.createQueryTab() }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close Tab', action: () => this.closeActiveQueryTab() }) })] }));
+            const tabItems = [
+                ...this.state.queryTabs.map((tab) => (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: this.renderQueryTab(tab) }, tab.id))),
+                jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("div", { title: 'New Tab', children: jsxRuntime.jsx(component.Button, { label: null, icon: core.SystemIcon.ADD, action: () => this.createQueryTab() }) }) }, 'new-tab'),
+            ];
+            return (jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: tabItems }));
+        }
+        renderQueryTab(tab) {
+            const active = tab.id === this.state.activeQueryTabId;
+            const editing = tab.id === this.state.editingQueryTabId;
+            const title = getTabDisplayTitle(tab.title);
+            const tabStyle = {
+                alignItems: 'center',
+                background: active ? '#607799' : '#eef2f7',
+                border: active ? '1px solid #526a8d' : '1px solid #cbd5e1',
+                borderRadius: '4px 4px 0 0',
+                color: active ? '#ffffff' : '#26364d',
+                display: 'inline-flex',
+                gap: '6px',
+                maxWidth: editing ? '340px' : '220px',
+                padding: '5px 7px'
+            };
+            if (editing) {
+                return (jsxRuntime.jsxs("div", { className: 'nsqlr-query-tab', style: tabStyle, children: [jsxRuntime.jsx(component.TextBox, { text: this.state.editingQueryTabTitle, placeholder: 'Tab name', onTextChanged: ({ text }) => this.setState({ editingQueryTabTitle: text }), rootStyle: { width: '190px' } }), jsxRuntime.jsx("div", { title: 'Apply tab name', children: jsxRuntime.jsx(component.Button, { label: null, icon: core.SystemIcon.CHECK, action: () => this.applyQueryTabRename(tab.id) }) })] }));
+            }
+            return (jsxRuntime.jsxs("div", { className: 'nsqlr-query-tab', style: tabStyle, children: [jsxRuntime.jsx("button", { type: 'button', title: `Open ${title}`, onClick: () => this.activateQueryTab(tab.id), style: {
+                            background: 'transparent',
+                            border: '0',
+                            color: 'inherit',
+                            cursor: 'pointer',
+                            font: 'inherit',
+                            maxWidth: '145px',
+                            overflow: 'hidden',
+                            padding: '0',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }, children: title }), jsxRuntime.jsx("div", { className: 'nsqlr-query-tab-edit', title: `Edit ${title}`, children: jsxRuntime.jsx(component.Button, { label: null, icon: core.SystemIcon.EDIT, action: () => this.startQueryTabRename(tab.id) }) }), jsxRuntime.jsx("button", { className: 'nsqlr-query-tab-close', type: 'button', "aria-label": `Close ${title}`, title: `Close ${title}`, onClick: () => this.closeQueryTab(tab.id), style: {
+                            background: active ? '#4d6382' : '#dde5ef',
+                            border: '0',
+                            borderRadius: '50%',
+                            color: 'inherit',
+                            cursor: 'pointer',
+                            fontSize: '11px',
+                            height: '18px',
+                            lineHeight: '18px',
+                            padding: '0',
+                            textAlign: 'center',
+                            width: '18px'
+                        }, children: "X" })] }));
         }
         renderRecordChatHistoryPanel() {
             const historyItems = this.state.recordChatHistory.map((entry) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx("div", { style: {
@@ -1313,7 +1384,10 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                         borderRadius: '4px',
                         padding: '8px'
                     }, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { children: entry.title }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: formatHistoryDate(entry.updatedAt) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Load', action: () => this.loadRecordChat(entry.id) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Delete', action: () => this.deleteRecordChat(entry.id) }) })] }) })] }) }) }, entry.id)));
-            return (jsxRuntime.jsxs("div", { style: { position: 'relative' }, children: [jsxRuntime.jsx("div", { style: { position: 'absolute', right: '16px', top: '12px', zIndex: '1' }, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: () => this.toggleRecordChatHistory() }) }), jsxRuntime.jsx(component.Portlet, { title: 'AI Chat History', icon: core.SystemIcon.LIST, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'New Chat', type: component.Button.Type.PRIMARY, action: () => this.createNewRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear All', action: () => this.clearRecordChatHistory() }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { maxHeight: 'calc(100vh - 220px)' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: historyItems.length > 0 ? historyItems : jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No chat history yet." }) }) }) }) })] }) })] }));
+            const chatHistoryItems = historyItems.length > 0 ? historyItems : [
+                jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No chat history yet." }) }, 'empty-chat-history')
+            ];
+            return (jsxRuntime.jsxs("div", { style: { position: 'relative' }, children: [jsxRuntime.jsx("div", { style: { position: 'absolute', right: '16px', top: '12px', zIndex: '1' }, children: jsxRuntime.jsx("div", { title: 'Close', children: jsxRuntime.jsx(component.Button, { label: null, icon: core.SystemIcon.CLOSE, action: () => this.toggleRecordChatHistory() }) }) }), jsxRuntime.jsx(component.Portlet, { title: 'AI Chat History', icon: core.SystemIcon.LIST, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'New Chat', type: component.Button.Type.PRIMARY, action: () => this.createNewRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear All', action: () => this.clearRecordChatHistory() }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { maxHeight: 'calc(100vh - 220px)' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: chatHistoryItems }) }) })] }) })] }));
         }
         onQueryChanged(query, caretPosition) {
             this.setState({
@@ -1477,6 +1551,8 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             }
             this.setState({
                 activeQueryTabId: tab.id,
+                editingQueryTabId: null,
+                editingQueryTabTitle: '',
                 query: tab.query,
                 hints: tab.hints,
                 suggestions: tab.suggestions,
@@ -1487,11 +1563,31 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 performance: tab.performance
             });
         }
+        startQueryTabRename(id) {
+            const tab = this.state.queryTabs.find((item) => item.id === id);
+            if (!tab) {
+                return;
+            }
+            this.setState({
+                editingQueryTabId: id,
+                editingQueryTabTitle: tab.title
+            });
+        }
+        applyQueryTabRename(id) {
+            const title = getTabDisplayTitle(this.state.editingQueryTabTitle);
+            this.setState({
+                editingQueryTabId: null,
+                editingQueryTabTitle: '',
+                queryTabs: this.state.queryTabs.map((tab) => (tab.id === id ? { ...tab, title } : tab))
+            });
+        }
         createQueryTab() {
             const tab = createQueryEditorTab('', `Query ${this.state.queryTabs.length + 1}`);
             const queryTabs = [...this.state.queryTabs, tab];
             this.setState({
                 activeQueryTabId: tab.id,
+                editingQueryTabId: null,
+                editingQueryTabTitle: '',
                 queryTabs,
                 query: tab.query,
                 hints: tab.hints,
@@ -1504,10 +1600,15 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             });
         }
         closeActiveQueryTab() {
+            this.closeQueryTab(this.state.activeQueryTabId);
+        }
+        closeQueryTab(id) {
             if (this.state.queryTabs.length === 1) {
                 const tab = createQueryEditorTab('', 'Query 1');
                 this.setState({
                     activeQueryTabId: tab.id,
+                    editingQueryTabId: null,
+                    editingQueryTabTitle: '',
                     queryTabs: [tab],
                     query: tab.query,
                     hints: tab.hints,
@@ -1520,11 +1621,17 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 });
                 return;
             }
-            const remainingTabs = this.state.queryTabs.filter((tab) => tab.id !== this.state.activeQueryTabId);
+            const closingIndex = this.state.queryTabs.findIndex((tab) => tab.id === id);
+            const remainingTabs = this.state.queryTabs.filter((tab) => tab.id !== id);
             const nextTabs = remainingTabs.length > 0 ? remainingTabs : [createQueryEditorTab('', 'Query 1')];
-            const nextTab = nextTabs[0];
+            const currentTab = this.state.queryTabs.find((tab) => tab.id === this.state.activeQueryTabId);
+            const nextTab = id === this.state.activeQueryTabId
+                ? nextTabs[Math.min(Math.max(closingIndex, 0), nextTabs.length - 1)]
+                : currentTab || nextTabs[0];
             this.setState({
                 activeQueryTabId: nextTab.id,
+                editingQueryTabId: this.state.editingQueryTabId === id ? null : this.state.editingQueryTabId,
+                editingQueryTabTitle: this.state.editingQueryTabId === id ? '' : this.state.editingQueryTabTitle,
                 queryTabs: nextTabs,
                 query: nextTab.query,
                 hints: nextTab.hints,
@@ -1873,6 +1980,10 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     }
     function updateActiveQueryTab(tabs, activeId, patch) {
         return tabs.map((tab) => (tab.id === activeId ? { ...tab, ...patch } : tab));
+    }
+    function getTabDisplayTitle(title) {
+        const text = String(title || '').replace(/\s+/g, ' ').trim();
+        return text || 'Untitled Query';
     }
     function titleQuery(query) {
         const compact = String(query || '').replace(/\s+/g, ' ').trim();

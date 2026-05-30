@@ -1,4 +1,4 @@
-import {ApplicationHeader, Button, ContentPanel, Portlet, ScrollPanel, StackPanel, Text, ThemeSelector} from '@uif-js/component';
+import {ApplicationHeader, Button, ContentPanel, Portlet, ScrollPanel, StackPanel, Text, TextBox, ThemeSelector} from '@uif-js/component';
 import {PureComponent, SystemIcon, Theme} from '@uif-js/core';
 import {getCompletions} from './application/CompletionService';
 import {QueryRunnerService} from './application/QueryRunnerService';
@@ -43,6 +43,8 @@ interface RunnerState {
   queryHistory: QueryHistoryItem[];
   queryHistoryVisible: boolean;
   queryTabs: QueryEditorTab[];
+  editingQueryTabId: string | null;
+  editingQueryTabTitle: string;
   hints: QueryHint[];
   suggestions: CompletionItem[];
   resultRows: Record<string, unknown>[];
@@ -84,6 +86,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       queryHistory: this.loadQueryHistory(),
       queryHistoryVisible: false,
       queryTabs: [initialTab],
+      editingQueryTabId: null,
+      editingQueryTabTitle: '',
       hints: analyzeSuiteQL(workingQuery),
       suggestions: getCompletions(workingQuery, workingQuery.length),
       resultRows: [],
@@ -121,6 +125,26 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     const items = [
       <StackPanel.Item key={'header'} shrink={0}>
         <div style={{position: 'relative'}}>
+          <style>
+            {`
+              .nsqlr-query-tab-close {
+                opacity: 0;
+                transition: opacity 120ms ease;
+              }
+
+              .nsqlr-query-tab-edit {
+                opacity: 0;
+                transition: opacity 120ms ease;
+              }
+
+              .nsqlr-query-tab:hover .nsqlr-query-tab-close,
+              .nsqlr-query-tab:focus-within .nsqlr-query-tab-close,
+              .nsqlr-query-tab:hover .nsqlr-query-tab-edit,
+              .nsqlr-query-tab:focus-within .nsqlr-query-tab-edit {
+                opacity: 1;
+              }
+            `}
+          </style>
           <ApplicationHeader
             icon={SystemIcon.SEARCH}
             title={'SuiteQL Runner'}
@@ -141,15 +165,15 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
           >
             dgenticdrive.com
           </a>
+          <div style={{padding: '0 20px 12px'}}>
+            {this.renderQueryTabs()}
+          </div>
         </div>
       </StackPanel.Item>,
       <StackPanel.Item key={'main'} grow={1}>
         <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL}>
           <ContentPanel outerGap={ContentPanel.GapSize.LARGE}>
             <StackPanel.Vertical itemGap={StackPanel.GapSize.LARGE}>
-              <StackPanel.Item>
-                {this.renderQueryTabs()}
-              </StackPanel.Item>
               <StackPanel.Item>
                 <QueryEditor
                   executionError={this.state.error}
@@ -268,26 +292,105 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   }
 
   private renderQueryTabs() {
-    const tabItems = this.state.queryTabs.map((tab) => (
-      <StackPanel.Item key={tab.id} shrink={0}>
-        <Button
-          label={`<> ${tab.title}`}
-          type={tab.id === this.state.activeQueryTabId ? Button.Type.PRIMARY : Button.Type.DEFAULT}
-          action={() => this.activateQueryTab(tab.id)}
-        />
-      </StackPanel.Item>
-    ));
+    const tabItems = [
+      ...this.state.queryTabs.map((tab) => (
+        <StackPanel.Item key={tab.id} shrink={0}>
+          {this.renderQueryTab(tab)}
+        </StackPanel.Item>
+      )),
+      <StackPanel.Item key={'new-tab'} shrink={0}>
+        <div title={'New Tab'}>
+          <Button label={null} icon={SystemIcon.ADD} action={() => this.createQueryTab()} />
+        </div>
+      </StackPanel.Item>,
+    ];
 
     return (
       <StackPanel wrap={true} itemGap={StackPanel.GapSize.SMALL} wrapGap={StackPanel.GapSize.SMALL}>
         {tabItems}
-        <StackPanel.Item shrink={0}>
-          <Button label={'New Tab'} action={() => this.createQueryTab()} />
-        </StackPanel.Item>
-        <StackPanel.Item shrink={0}>
-          <Button label={'Close Tab'} action={() => this.closeActiveQueryTab()} />
-        </StackPanel.Item>
       </StackPanel>
+    );
+  }
+
+  private renderQueryTab(tab: QueryEditorTab) {
+    const active = tab.id === this.state.activeQueryTabId;
+    const editing = tab.id === this.state.editingQueryTabId;
+    const title = getTabDisplayTitle(tab.title);
+    const tabStyle = {
+      alignItems: 'center',
+      background: active ? '#607799' : '#eef2f7',
+      border: active ? '1px solid #526a8d' : '1px solid #cbd5e1',
+      borderRadius: '4px 4px 0 0',
+      color: active ? '#ffffff' : '#26364d',
+      display: 'inline-flex',
+      gap: '6px',
+      maxWidth: editing ? '340px' : '220px',
+      padding: '5px 7px'
+    };
+
+    if (editing) {
+      return (
+        <div className={'nsqlr-query-tab'} style={tabStyle}>
+          <TextBox
+            text={this.state.editingQueryTabTitle}
+            placeholder={'Tab name'}
+            onTextChanged={({text}) => this.setState({editingQueryTabTitle: text})}
+            rootStyle={{width: '190px'}}
+          />
+          <div title={'Apply tab name'}>
+            <Button label={null} icon={SystemIcon.CHECK} action={() => this.applyQueryTabRename(tab.id)} />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={'nsqlr-query-tab'} style={tabStyle}>
+        <button
+          type={'button'}
+          title={`Open ${title}`}
+          onClick={() => this.activateQueryTab(tab.id)}
+          style={{
+            background: 'transparent',
+            border: '0',
+            color: 'inherit',
+            cursor: 'pointer',
+            font: 'inherit',
+            maxWidth: '145px',
+            overflow: 'hidden',
+            padding: '0',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {title}
+        </button>
+        <div className={'nsqlr-query-tab-edit'} title={`Edit ${title}`}>
+          <Button label={null} icon={SystemIcon.EDIT} action={() => this.startQueryTabRename(tab.id)} />
+        </div>
+        <button
+          className={'nsqlr-query-tab-close'}
+          type={'button'}
+          aria-label={`Close ${title}`}
+          title={`Close ${title}`}
+          onClick={() => this.closeQueryTab(tab.id)}
+          style={{
+            background: active ? '#4d6382' : '#dde5ef',
+            border: '0',
+            borderRadius: '50%',
+            color: 'inherit',
+            cursor: 'pointer',
+            fontSize: '11px',
+            height: '18px',
+            lineHeight: '18px',
+            padding: '0',
+            textAlign: 'center',
+            width: '18px'
+          }}
+        >
+          X
+        </button>
+      </div>
     );
   }
 
@@ -322,11 +425,18 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
         </div>
       </StackPanel.Item>
     ));
+    const chatHistoryItems = historyItems.length > 0 ? historyItems : [
+      <StackPanel.Item key={'empty-chat-history'}>
+        <Text color={Text.Color.SECONDARY}>No chat history yet.</Text>
+      </StackPanel.Item>
+    ];
 
     return (
       <div style={{position: 'relative'}}>
         <div style={{position: 'absolute', right: '16px', top: '12px', zIndex: '1'}}>
-          <Button label={'Close'} action={() => this.toggleRecordChatHistory()} />
+          <div title={'Close'}>
+            <Button label={null} icon={SystemIcon.CLOSE} action={() => this.toggleRecordChatHistory()} />
+          </div>
         </div>
         <Portlet title={'AI Chat History'} icon={SystemIcon.LIST}>
         <StackPanel.Vertical itemGap={StackPanel.GapSize.MEDIUM}>
@@ -343,7 +453,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
           <StackPanel.Item>
             <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL} rootStyle={{maxHeight: 'calc(100vh - 220px)'}}>
               <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
-                {historyItems.length > 0 ? historyItems : <StackPanel.Item><Text color={Text.Color.SECONDARY}>No chat history yet.</Text></StackPanel.Item>}
+                {chatHistoryItems}
               </StackPanel.Vertical>
             </ScrollPanel>
           </StackPanel.Item>
@@ -542,6 +652,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
 
     this.setState({
       activeQueryTabId: tab.id,
+      editingQueryTabId: null,
+      editingQueryTabTitle: '',
       query: tab.query,
       hints: tab.hints,
       suggestions: tab.suggestions,
@@ -553,12 +665,37 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     });
   }
 
+  private startQueryTabRename(id: string) {
+    const tab = this.state.queryTabs.find((item) => item.id === id);
+
+    if (!tab) {
+      return;
+    }
+
+    this.setState({
+      editingQueryTabId: id,
+      editingQueryTabTitle: tab.title
+    });
+  }
+
+  private applyQueryTabRename(id: string) {
+    const title = getTabDisplayTitle(this.state.editingQueryTabTitle);
+
+    this.setState({
+      editingQueryTabId: null,
+      editingQueryTabTitle: '',
+      queryTabs: this.state.queryTabs.map((tab) => (tab.id === id ? {...tab, title} : tab))
+    });
+  }
+
   private createQueryTab() {
     const tab = createQueryEditorTab('', `Query ${this.state.queryTabs.length + 1}`);
     const queryTabs = [...this.state.queryTabs, tab];
 
     this.setState({
       activeQueryTabId: tab.id,
+      editingQueryTabId: null,
+      editingQueryTabTitle: '',
       queryTabs,
       query: tab.query,
       hints: tab.hints,
@@ -572,11 +709,17 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   }
 
   private closeActiveQueryTab() {
+    this.closeQueryTab(this.state.activeQueryTabId);
+  }
+
+  private closeQueryTab(id: string) {
     if (this.state.queryTabs.length === 1) {
       const tab = createQueryEditorTab('', 'Query 1');
 
       this.setState({
         activeQueryTabId: tab.id,
+        editingQueryTabId: null,
+        editingQueryTabTitle: '',
         queryTabs: [tab],
         query: tab.query,
         hints: tab.hints,
@@ -590,12 +733,18 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       return;
     }
 
-    const remainingTabs = this.state.queryTabs.filter((tab) => tab.id !== this.state.activeQueryTabId);
+    const closingIndex = this.state.queryTabs.findIndex((tab) => tab.id === id);
+    const remainingTabs = this.state.queryTabs.filter((tab) => tab.id !== id);
     const nextTabs = remainingTabs.length > 0 ? remainingTabs : [createQueryEditorTab('', 'Query 1')];
-    const nextTab = nextTabs[0];
+    const currentTab = this.state.queryTabs.find((tab) => tab.id === this.state.activeQueryTabId);
+    const nextTab = id === this.state.activeQueryTabId
+      ? nextTabs[Math.min(Math.max(closingIndex, 0), nextTabs.length - 1)]
+      : currentTab || nextTabs[0];
 
     this.setState({
       activeQueryTabId: nextTab.id,
+      editingQueryTabId: this.state.editingQueryTabId === id ? null : this.state.editingQueryTabId,
+      editingQueryTabTitle: this.state.editingQueryTabId === id ? '' : this.state.editingQueryTabTitle,
       queryTabs: nextTabs,
       query: nextTab.query,
       hints: nextTab.hints,
@@ -1022,6 +1171,12 @@ function updateActiveQueryTab(
   patch: Partial<QueryEditorTab>
 ): QueryEditorTab[] {
   return tabs.map((tab) => (tab.id === activeId ? {...tab, ...patch} : tab));
+}
+
+function getTabDisplayTitle(title: string) {
+  const text = String(title || '').replace(/\s+/g, ' ').trim();
+
+  return text || 'Untitled Query';
 }
 
 function titleQuery(query: string) {

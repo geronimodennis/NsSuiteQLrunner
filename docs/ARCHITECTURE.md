@@ -59,7 +59,7 @@ Responsibilities:
 
 - Render the editor with tabs, query history, integrated autocomplete, warning/error hints, floating report/schema chat, performance matrix, and results.
 - Convert view data into UIF component inputs such as `DataGrid` columns and `ArrayDataSource`.
-- Keep the main workflow ordered as query tabs, Query Editor with actionable hints and history, Result, then the Performance Matrix diagnostics panel.
+- Keep the main workflow ordered as the header query tab strip, Query Editor with actionable hints and history, Result, then the Performance Matrix diagnostics panel. The tab strip owns per-tab create, rename, activate, and close interactions.
 - Expose foldable secondary sections through UIF `Portlet` collapse controls.
 - Stay passive: panels receive props and callbacks, but do not execute SuiteQL or own business rules.
 

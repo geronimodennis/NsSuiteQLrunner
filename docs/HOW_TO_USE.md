@@ -14,7 +14,7 @@ The query runs through the RESTlet as the current NetSuite user, so role permiss
 
 Use the Query Editor for the SuiteQL statement.
 
-Use the query tabs above Query Editor to keep multiple SuiteQL drafts open. Each tab keeps its own editor text, Result panel, SuiteQL hints, and SuiteQL Performance Matrix values. Select `New Tab` to start another draft, or `Close Tab` to close the active draft.
+Use the query tabs in the SuiteQL Runner header to keep multiple SuiteQL drafts open. Each tab keeps its own editor text, Result panel, SuiteQL hints, and SuiteQL Performance Matrix values. Select the add icon to start another draft. Hover a tab to show the edit icon, rename the tab, then select the check icon to apply the new tab label. Use the tab `X` to close an individual draft.
 
 The editor starts blank on first use. When you select `Run SuiteQL`, `Format SuiteQL`, or `Analyze`, the current query is saved in browser storage and restored automatically when you leave the page and come back.
 

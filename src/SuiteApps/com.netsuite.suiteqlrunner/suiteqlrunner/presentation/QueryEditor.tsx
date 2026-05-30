@@ -45,6 +45,11 @@ export function QueryEditor(props: QueryEditorProps) {
       />
     </StackPanel.Item>
   ));
+  const autocompleteStackItems = autocompleteItems.length > 0 ? autocompleteItems : [
+    <StackPanel.Item key={'empty-autocomplete'} shrink={0}>
+      <div style={{display: 'none'}} />
+    </StackPanel.Item>
+  ];
 
   return (
     <Portlet title={'Query Editor'} icon={SystemIcon.EDIT}>
@@ -132,7 +137,7 @@ export function QueryEditor(props: QueryEditorProps) {
         </StackPanel.Item>
         <StackPanel.Item>
           <StackPanel wrap={true} itemGap={StackPanel.GapSize.SMALL} wrapGap={StackPanel.GapSize.SMALL}>
-            {autocompleteItems.length > 0 ? autocompleteItems : <StackPanel.Item shrink={0}><div style={{display: 'none'}} /></StackPanel.Item>}
+            {autocompleteStackItems}
           </StackPanel>
         </StackPanel.Item>
         <StackPanel.Item>
@@ -181,6 +186,11 @@ function renderHistoryPanel(props: QueryEditorProps) {
       </div>
     </StackPanel.Item>
   ));
+  const queryHistoryItems = historyItems.length > 0 ? historyItems : [
+    <StackPanel.Item key={'empty-query-history'}>
+      <Text color={Text.Color.SECONDARY}>No query history yet.</Text>
+    </StackPanel.Item>
+  ];
 
   return (
     <div
@@ -204,7 +214,7 @@ function renderHistoryPanel(props: QueryEditorProps) {
         <StackPanel.Item>
           <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL} rootStyle={{maxHeight: '220px'}}>
             <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
-              {historyItems.length > 0 ? historyItems : <StackPanel.Item><Text color={Text.Color.SECONDARY}>No query history yet.</Text></StackPanel.Item>}
+              {queryHistoryItems}
             </StackPanel.Vertical>
           </ScrollPanel>
         </StackPanel.Item>

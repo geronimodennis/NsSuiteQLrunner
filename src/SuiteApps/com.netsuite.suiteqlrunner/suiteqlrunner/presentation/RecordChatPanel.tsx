@@ -53,7 +53,9 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
   return (
     <div style={{height: '100%', position: 'relative'}}>
       <div style={{position: 'absolute', right: '16px', top: '12px', zIndex: '1'}}>
-        <Button label={'Close'} action={props.onClose} />
+        <div title={'Close'}>
+          <Button label={null} icon={SystemIcon.CLOSE} action={props.onClose} />
+        </div>
       </div>
       <Portlet title={'AI Report & Schema Chat'} icon={SystemIcon.HELP} rootStyle={props.rootStyle}>
         <StackPanel.Vertical rootStyle={{height: '100%'}} itemGap={StackPanel.GapSize.MEDIUM}>

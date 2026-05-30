@@ -9,7 +9,7 @@ It should not be exposed as a broad reporting portal.
 ## Running Queries
 
 1. Enter SuiteQL in the editor.
-2. Use query tabs when comparing multiple drafts. Each tab keeps its own Result and Performance Matrix state.
+2. Use query tabs when comparing multiple drafts. Each tab keeps its own Result and Performance Matrix state. The header tab strip uses an add icon for new drafts, hover edit/check controls for renaming, and a tab `X` for closing an individual draft.
 3. Use Format to normalize keyword casing and clause layout.
 4. Review hints for likely SuiteQL or Oracle SQL issues.
 5. Select `AI Chat` in the Query Editor when you need help with reports, saved searches, standard NetSuite record type IDs, SuiteQL sources, transaction type codes, joins, table relationships, or schema patterns.
