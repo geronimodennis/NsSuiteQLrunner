@@ -1,4 +1,4 @@
-import {Button, FormattedText, Portlet, ScrollPanel, StackPanel, Text, TextArea} from '@uif-js/component';
+import {Button, CheckBox, FormattedText, Portlet, ScrollPanel, StackPanel, Text, TextArea} from '@uif-js/component';
 import {SystemIcon} from '@uif-js/core';
 import {RecordChatMessage} from '../domain/models';
 
@@ -6,14 +6,17 @@ interface RecordChatPanelProps {
   draft: string;
   error: string | null;
   messages: RecordChatMessage[];
+  merging: boolean;
   running: boolean;
   rootStyle?: Record<string, string>;
+  useAiQueryMerge: boolean;
   onAsk: () => void;
   onClear: () => void;
   onClose: () => void;
   onDraftChanged: (draft: string) => void;
   onInsertSuiteQL: (query: string) => void;
   onMergeSuiteQL: (query: string) => void;
+  onUseAiQueryMergeChanged: (useAiQueryMerge: boolean) => void;
 }
 
 export function RecordChatPanel(props: RecordChatPanelProps) {
@@ -36,7 +39,7 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
           </StackPanel.Item>
           <StackPanel.Item>
             {message.role === 'assistant' ? (
-              renderMarkdown(message.text, props.onInsertSuiteQL, props.onMergeSuiteQL)
+              renderMarkdown(message.text, props.merging, props.onInsertSuiteQL, props.onMergeSuiteQL)
             ) : (
               renderPlainText(message.text)
             )}
@@ -74,6 +77,21 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
               <Text color={Text.Color.SECONDARY}>AI chat tool</Text>
             </StackPanel.Item>
             <StackPanel.Item>
+              <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
+                <StackPanel.Item>
+                  <CheckBox
+                    label={'Use AI query merging'}
+                    labelPosition={CheckBox.LabelPosition.RIGHT}
+                    value={props.useAiQueryMerge}
+                    action={({value}) => props.onUseAiQueryMergeChanged(Boolean(value))}
+                  />
+                </StackPanel.Item>
+                <StackPanel.Item>
+                  <Text color={Text.Color.SECONDARY}>Merge to Current Query may use NetSuite AI tokens.</Text>
+                </StackPanel.Item>
+              </StackPanel.Vertical>
+            </StackPanel.Item>
+            <StackPanel.Item>
               <TextArea
                 text={props.draft}
                 rowCount={4}
@@ -104,11 +122,16 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
   );
 }
 
-function renderMarkdown(text: string, onInsertSuiteQL: (query: string) => void, onMergeSuiteQL: (query: string) => void) {
+function renderMarkdown(
+  text: string,
+  merging: boolean,
+  onInsertSuiteQL: (query: string) => void,
+  onMergeSuiteQL: (query: string) => void
+) {
   const items = parseMarkdownBlocks(text).map((block, index) => (
     <StackPanel.Item key={`markdown-${index}`}>
       {block.type === 'code' ? (
-        renderCodeBlock(block.content, block.language, onInsertSuiteQL, onMergeSuiteQL)
+        renderCodeBlock(block.content, block.language, merging, onInsertSuiteQL, onMergeSuiteQL)
       ) : (
         FormattedText.markdown(block.content, {
           wrap: true,
@@ -145,6 +168,7 @@ function renderPlainText(text: string, isError = false) {
 function renderCodeBlock(
   text: string,
   language: string,
+  merging: boolean,
   onInsertSuiteQL: (query: string) => void,
   onMergeSuiteQL: (query: string) => void
 ) {
@@ -176,10 +200,10 @@ function renderCodeBlock(
         {showSuiteQLActions ? (
           <StackPanel alignment={StackPanel.Alignment.CENTER} itemGap={StackPanel.GapSize.SMALL}>
             <StackPanel.Item shrink={0}>
-              <Button label={'Insert to SuiteQL Editor'} action={() => onInsertSuiteQL(text)} />
+              <Button label={'Insert to Query Editor'} action={() => onInsertSuiteQL(text)} />
             </StackPanel.Item>
             <StackPanel.Item shrink={0}>
-              <Button label={'Merge to Current Query'} action={() => onMergeSuiteQL(text)} />
+              <Button label={merging ? 'Merging...' : 'Merge to Current Query'} action={() => onMergeSuiteQL(text)} />
             </StackPanel.Item>
           </StackPanel>
         ) : (

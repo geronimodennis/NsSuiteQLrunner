@@ -55,7 +55,7 @@ The chat is powered by NetSuite's `N/llm` module through the SuiteQL Runner REST
 
 The assistant is allowed to answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the user.
 
-AI responses that include SQL or SuiteQL code blocks expose actions to insert that SQL into the Query Editor or merge it into the current editor text. Users should review AI-generated SQL before running it.
+AI responses that include SQL or SuiteQL code blocks expose actions to insert that SQL into the Query Editor or merge it into the current editor text. AI-assisted query merging is controlled by the `Use AI query merging` checkbox and may use NetSuite AI tokens. When AI merge is unavailable, the app warns the user and performs a basic append-style merge. Users should review AI-generated SQL before running it.
 
 Custom records, custom fields, and feature-dependent fields remain account-specific. Verify those details in the target account's Records Catalog, Records Browser, or Schema Browser before using them in production queries.
 

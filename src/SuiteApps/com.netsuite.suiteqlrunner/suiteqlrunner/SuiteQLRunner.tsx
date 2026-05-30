@@ -31,9 +31,11 @@ interface RunnerState {
   performance: QueryExecutionMeta;
   recordChatDraft: string;
   recordChatError: string | null;
+  recordChatMerging: boolean;
   recordChatMessages: RecordChatMessage[];
   recordChatRunning: boolean;
   recordChatVisible: boolean;
+  useAiQueryMerge: boolean;
 }
 
 export default class SuiteQLRunner extends PureComponent<Record<string, never>, RunnerState> {
@@ -60,6 +62,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       performance: {},
       recordChatDraft: '',
       recordChatError: null,
+      recordChatMerging: false,
       recordChatMessages: [
         {
           role: 'assistant',
@@ -67,7 +70,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
         }
       ],
       recordChatRunning: false,
-      recordChatVisible: false
+      recordChatVisible: false,
+      useAiQueryMerge: true
     };
   }
 
@@ -172,6 +176,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
             <RecordChatPanel
               draft={this.state.recordChatDraft}
               error={this.state.recordChatError}
+              merging={this.state.recordChatMerging}
               messages={this.state.recordChatMessages}
               running={this.state.recordChatRunning}
               rootStyle={{
@@ -186,6 +191,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
               onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
               onInsertSuiteQL={(query) => this.insertSuiteQLFromChat(query)}
               onMergeSuiteQL={(query) => this.mergeSuiteQLFromChat(query)}
+              onUseAiQueryMergeChanged={(useAiQueryMerge) => this.setState({useAiQueryMerge})}
+              useAiQueryMerge={this.state.useAiQueryMerge}
             />
           </div>
         </StackPanel.Item>
@@ -246,12 +253,50 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     this.setEditorQuery(nextQuery);
   }
 
-  private mergeSuiteQLFromChat(query: string) {
-    const currentQuery = this.state.query.trim();
-    const incomingQuery = query.trim();
-    const nextQuery = currentQuery ? `${currentQuery}\n\n${incomingQuery}` : incomingQuery;
+  private async mergeSuiteQLFromChat(query: string) {
+    if (!this.state.useAiQueryMerge) {
+      this.basicMergeSuiteQLFromChat(query, null);
+      return;
+    }
+
+    this.setState({
+      recordChatMerging: true,
+      recordChatError: null
+    });
+
+    const outcome = await this.recordChat.ask(buildMergePrompt(query), this.state.recordChatMessages, this.state.query);
+    const mergedQuery = extractSuiteQLFromText(getLastAssistantMessage(outcome.messages));
+
+    if (outcome.error || !mergedQuery) {
+      this.basicMergeSuiteQLFromChat(
+        query,
+        'AI is not available to merge the query. Basic merge was applied instead.'
+      );
+      this.setState({
+        recordChatMessages: outcome.messages,
+        recordChatMerging: false
+      });
+      return;
+    }
+
+    this.setEditorQuery(mergedQuery);
+    this.setState({
+      recordChatError: null,
+      recordChatMessages: outcome.messages,
+      recordChatMerging: false
+    });
+  }
+
+  private basicMergeSuiteQLFromChat(query: string, warning: string | null) {
+    const nextQuery = basicMergeQueries(this.state.query, query);
 
     this.setEditorQuery(nextQuery);
+
+    if (warning) {
+      this.setState({
+        recordChatError: warning
+      });
+    }
   }
 
   private setEditorQuery(query: string) {
@@ -345,4 +390,73 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       // Query persistence is best-effort; private browsing or account policy can block storage.
     }
   }
+}
+
+function buildMergePrompt(query: string) {
+  return [
+    'Merge this SQL/SuiteQL suggestion into the current Query Editor SuiteQL.',
+    'Return only one complete merged SuiteQL query in a fenced sql code block.',
+    'Do not include explanation outside the code block.',
+    'Preserve the current query intent and incorporate useful columns, joins, filters, grouping, and ordering from the suggestion.',
+    '',
+    'SQL/SuiteQL suggestion to merge:',
+    '```sql',
+    query.trim(),
+    '```'
+  ].join('\n');
+}
+
+function getLastAssistantMessage(messages: RecordChatMessage[]) {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].role === 'assistant') {
+      return messages[index].text;
+    }
+  }
+
+  return '';
+}
+
+function extractSuiteQLFromText(text: string) {
+  const codePattern = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = codePattern.exec(text)) !== null) {
+    const language = String(match[1] || '').trim().toLowerCase();
+    const content = String(match[2] || '').trim();
+
+    if (isSuiteQLText(language, content)) {
+      return content;
+    }
+  }
+
+  const trimmed = String(text || '').trim();
+
+  if (isSuiteQLText('', trimmed)) {
+    return trimmed;
+  }
+
+  return '';
+}
+
+function isSuiteQLText(language: string, content: string) {
+  if (language === 'sql' || language === 'suiteql') {
+    return true;
+  }
+
+  return /^(SELECT|WITH)\b/i.test(content);
+}
+
+function basicMergeQueries(currentQuery: string, incomingQuery: string) {
+  const current = String(currentQuery || '').trim();
+  const incoming = String(incomingQuery || '').trim();
+
+  if (!current) {
+    return incoming;
+  }
+
+  if (!incoming || current === incoming) {
+    return current;
+  }
+
+  return [current, '-- Merged SuiteQL suggestion', incoming].join('\n\n');
 }

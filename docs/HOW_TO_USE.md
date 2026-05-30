@@ -69,7 +69,7 @@ The AI chat specializes in reports, saved searches, standard NetSuite record typ
 
 AI responses support Markdown, including bullets and fenced SQL examples. Fenced code blocks render as separate code boxes.
 
-When an AI response includes a SQL or SuiteQL code block, use `Insert to SuiteQL Editor` to replace the current editor text with that SQL, or `Merge to Current Query` to append it to the current editor text for comparison or manual editing.
+When an AI response includes a SQL or SuiteQL code block, use `Insert to Query Editor` to replace the current editor text with that SQL, or `Merge to Current Query` to combine it with the current editor text. The `Use AI query merging` checkbox controls whether merge asks NetSuite AI to produce one combined query. AI merging may use NetSuite AI tokens; when AI is unavailable, the app shows a warning and falls back to a basic append-style merge.
 
 It can still answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the workflow.
 

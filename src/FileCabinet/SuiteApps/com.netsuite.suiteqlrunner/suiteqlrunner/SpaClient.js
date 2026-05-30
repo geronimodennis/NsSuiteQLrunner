@@ -1082,12 +1082,12 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: renderPlainText(props.error, true) }, 'error'));
         }
         props.messages.forEach((message, index) => {
-            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: message.role === 'assistant' ? (renderMarkdown(message.text, props.onInsertSuiteQL, props.onMergeSuiteQL)) : (renderPlainText(message.text)) })] }) }, `${message.role}-${index}`));
+            responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: message.role === 'assistant' ? (renderMarkdown(message.text, props.merging, props.onInsertSuiteQL, props.onMergeSuiteQL)) : (renderPlainText(message.text)) })] }) }, `${message.role}-${index}`));
         });
-        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: props.onClose }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: props.onClose }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.CheckBox, { label: 'Use AI query merging', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.useAiQueryMerge, action: ({ value }) => props.onUseAiQueryMergeChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Merge to Current Query may use NetSuite AI tokens." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
     }
-    function renderMarkdown(text, onInsertSuiteQL, onMergeSuiteQL) {
-        const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (renderCodeBlock(block.content, block.language, onInsertSuiteQL, onMergeSuiteQL)) : (component.FormattedText.markdown(block.content, {
+    function renderMarkdown(text, merging, onInsertSuiteQL, onMergeSuiteQL) {
+        const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (renderCodeBlock(block.content, block.language, merging, onInsertSuiteQL, onMergeSuiteQL)) : (component.FormattedText.markdown(block.content, {
                 wrap: true,
                 whitespace: true
             })) }, `markdown-${index}`)));
@@ -1107,7 +1107,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 wordBreak: 'break-word'
             }, children: text }));
     }
-    function renderCodeBlock(text, language, onInsertSuiteQL, onMergeSuiteQL) {
+    function renderCodeBlock(text, language, merging, onInsertSuiteQL, onMergeSuiteQL) {
         const showSuiteQLActions = isSuiteQLBlock(language, text);
         return (jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx("pre", { style: {
                             backgroundColor: '#f6f8fa',
@@ -1122,7 +1122,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                             padding: '10px 12px',
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word'
-                        }, children: text || ' ' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: showSuiteQLActions ? (jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Insert to SuiteQL Editor', action: () => onInsertSuiteQL(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Merge to Current Query', action: () => onMergeSuiteQL(text) }) })] })) : (jsxRuntime.jsx("div", { style: { display: 'none' } })) })] }));
+                        }, children: text || ' ' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: showSuiteQLActions ? (jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Insert to Query Editor', action: () => onInsertSuiteQL(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: merging ? 'Merging...' : 'Merge to Current Query', action: () => onMergeSuiteQL(text) }) })] })) : (jsxRuntime.jsx("div", { style: { display: 'none' } })) })] }));
     }
     function parseMarkdownBlocks(text) {
         const blocks = [];
@@ -1213,6 +1213,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 performance: {},
                 recordChatDraft: '',
                 recordChatError: null,
+                recordChatMerging: false,
                 recordChatMessages: [
                     {
                         role: 'assistant',
@@ -1220,7 +1221,8 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                     }
                 ],
                 recordChatRunning: false,
-                recordChatVisible: false
+                recordChatVisible: false,
+                useAiQueryMerge: true
             };
         }
         render() {
@@ -1254,12 +1256,12 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                             overflow: 'hidden',
                             zIndex: '1000',
                             boxShadow: '0 18px 48px rgba(15, 23, 42, 0.24)'
-                        }, children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {
+                        }, children: jsxRuntime.jsx(RecordChatPanel, { draft: this.state.recordChatDraft, error: this.state.recordChatError, merging: this.state.recordChatMerging, messages: this.state.recordChatMessages, running: this.state.recordChatRunning, rootStyle: {
                                 width: '100%',
                                 height: '100%',
                                 overflow: 'hidden',
                                 direction: 'ltr'
-                            }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onClose: () => this.closeRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }), onInsertSuiteQL: (query) => this.insertSuiteQLFromChat(query), onMergeSuiteQL: (query) => this.mergeSuiteQLFromChat(query) }) }) }, 'record-chat'));
+                            }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onClose: () => this.closeRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }), onInsertSuiteQL: (query) => this.insertSuiteQLFromChat(query), onMergeSuiteQL: (query) => this.mergeSuiteQLFromChat(query), onUseAiQueryMergeChanged: (useAiQueryMerge) => this.setState({ useAiQueryMerge }), useAiQueryMerge: this.state.useAiQueryMerge }) }) }, 'record-chat'));
             }
             return items;
         }
@@ -1305,11 +1307,40 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             const nextQuery = query.trim();
             this.setEditorQuery(nextQuery);
         }
-        mergeSuiteQLFromChat(query) {
-            const currentQuery = this.state.query.trim();
-            const incomingQuery = query.trim();
-            const nextQuery = currentQuery ? `${currentQuery}\n\n${incomingQuery}` : incomingQuery;
+        async mergeSuiteQLFromChat(query) {
+            if (!this.state.useAiQueryMerge) {
+                this.basicMergeSuiteQLFromChat(query, null);
+                return;
+            }
+            this.setState({
+                recordChatMerging: true,
+                recordChatError: null
+            });
+            const outcome = await this.recordChat.ask(buildMergePrompt(query), this.state.recordChatMessages, this.state.query);
+            const mergedQuery = extractSuiteQLFromText(getLastAssistantMessage(outcome.messages));
+            if (outcome.error || !mergedQuery) {
+                this.basicMergeSuiteQLFromChat(query, 'AI is not available to merge the query. Basic merge was applied instead.');
+                this.setState({
+                    recordChatMessages: outcome.messages,
+                    recordChatMerging: false
+                });
+                return;
+            }
+            this.setEditorQuery(mergedQuery);
+            this.setState({
+                recordChatError: null,
+                recordChatMessages: outcome.messages,
+                recordChatMerging: false
+            });
+        }
+        basicMergeSuiteQLFromChat(query, warning) {
+            const nextQuery = basicMergeQueries(this.state.query, query);
             this.setEditorQuery(nextQuery);
+            if (warning) {
+                this.setState({
+                    recordChatError: warning
+                });
+            }
         }
         setEditorQuery(query) {
             this.setState({
@@ -1388,6 +1419,60 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 // Query persistence is best-effort; private browsing or account policy can block storage.
             }
         }
+    }
+    function buildMergePrompt(query) {
+        return [
+            'Merge this SQL/SuiteQL suggestion into the current Query Editor SuiteQL.',
+            'Return only one complete merged SuiteQL query in a fenced sql code block.',
+            'Do not include explanation outside the code block.',
+            'Preserve the current query intent and incorporate useful columns, joins, filters, grouping, and ordering from the suggestion.',
+            '',
+            'SQL/SuiteQL suggestion to merge:',
+            '```sql',
+            query.trim(),
+            '```'
+        ].join('\n');
+    }
+    function getLastAssistantMessage(messages) {
+        for (let index = messages.length - 1; index >= 0; index -= 1) {
+            if (messages[index].role === 'assistant') {
+                return messages[index].text;
+            }
+        }
+        return '';
+    }
+    function extractSuiteQLFromText(text) {
+        const codePattern = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+        let match;
+        while ((match = codePattern.exec(text)) !== null) {
+            const language = String(match[1] || '').trim().toLowerCase();
+            const content = String(match[2] || '').trim();
+            if (isSuiteQLText(language, content)) {
+                return content;
+            }
+        }
+        const trimmed = String(text || '').trim();
+        if (isSuiteQLText('', trimmed)) {
+            return trimmed;
+        }
+        return '';
+    }
+    function isSuiteQLText(language, content) {
+        if (language === 'sql' || language === 'suiteql') {
+            return true;
+        }
+        return /^(SELECT|WITH)\b/i.test(content);
+    }
+    function basicMergeQueries(currentQuery, incomingQuery) {
+        const current = String(currentQuery || '').trim();
+        const incoming = String(incomingQuery || '').trim();
+        if (!current) {
+            return incoming;
+        }
+        if (!incoming || current === incoming) {
+            return current;
+        }
+        return [current, '-- Merged SuiteQL suggestion', incoming].join('\n\n');
     }
 
     const run = (context) => {
