@@ -3,7 +3,7 @@
   <isinactive>F</isinactive>
   <name>SuiteQL Runner RESTlet</name>
   <notifyadmins>F</notifyadmins>
-  <scriptfile>[/SuiteScripts/com.netsuite.suiteqlrunner/SuiteQLRunnerRestlet.js]</scriptfile>
+  <scriptfile>[/SuiteApps/com.netsuite.suiteqlrunner/SuiteQLRunnerRestlet.js]</scriptfile>
   <scriptdeployments>
     <scriptdeployment scriptid="customdeploy_nsqlr_restlet">
       <allemployees>F</allemployees>

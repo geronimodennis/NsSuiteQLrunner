@@ -10,4 +10,15 @@
   <audienceallroles>T</audienceallroles>
   <audienceroles></audienceroles>
   <executeas></executeas>
+  <usesuif>T</usesuif>
+  <notifyadmins>F</notifyadmins>
+  <notifyowner>T</notifyowner>
+  <notifyuser>F</notifyuser>
+  <notifyemails></notifyemails>
+  <links>
+    <link>
+      <linkcategory>BASICLISTSSEARCH</linkcategory>
+      <linklabel>SuiteQLRunner: dgentic tooling</linklabel>
+    </link>
+  </links>
 </singlepageapp>
