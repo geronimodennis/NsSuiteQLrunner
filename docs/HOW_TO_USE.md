@@ -22,7 +22,7 @@ Use `Format SuiteQL` to clean up keyword casing and line breaks. Use `Analyze` t
 
 Autocomplete suggestions appear inside Query Editor and include known SuiteQL and Oracle SQL language constructs such as clauses, functions, built-ins, pseudo-columns, and bind variables.
 
-Hints are advisory. They can flag likely issues such as malformed clauses, dangling operators, trailing commas, unsupported functions, and SQL dialect mismatches, but they do not block `Run SuiteQL`. Warning and error hints appear directly under Query Editor. Informational hints stay hidden to save space.
+Hints are advisory. They can flag likely issues such as malformed clauses, malformed `ORDER BY` expressions, dangling operators, trailing commas, unsupported functions, and SQL dialect mismatches, but they do not block `Run SuiteQL`. Warning and error hints appear directly under Query Editor. Informational hints stay hidden to save space.
 
 NetSuite remains the final source of truth. If `Run SuiteQL` fails, the execution error appears in the Query Editor hint section.
 

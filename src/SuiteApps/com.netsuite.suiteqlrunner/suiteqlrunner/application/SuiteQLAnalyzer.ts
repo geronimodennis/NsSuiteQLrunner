@@ -56,6 +56,7 @@ export function analyzeSuiteQL(query: string): QueryHint[] {
   }
 
   const analysisText = stripCommentsAndLiterals(query).toUpperCase();
+  const syntaxText = maskLiteralsForSyntax(query).toUpperCase();
   const firstKeyword = (analysisText.match(/\b[A-Z][A-Z0-9_$#]*\b/) || [])[0];
 
   if (firstKeyword && firstKeyword !== 'SELECT' && firstKeyword !== 'WITH') {
@@ -76,7 +77,7 @@ export function analyzeSuiteQL(query: string): QueryHint[] {
 
   addMutationHints(analysisText, hints);
   addSqlServerDialectHints(analysisText, hints);
-  addPotentialSyntaxHints(analysisText, hints);
+  addPotentialSyntaxHints(syntaxText, hints);
   addUnsupportedFunctionHints(analysisText, hints);
   addIdentifierHints(query, hints);
   addOracleLimitHint(analysisText, hints);
@@ -189,6 +190,49 @@ function addPotentialSyntaxHints(analysisText: string, hints: QueryHint[]) {
       detail: 'Most SuiteQL joins should include ON. Use CROSS JOIN only when a Cartesian join is intentional.'
     });
   }
+
+  addMalformedOrderByHints(compact, hints);
+}
+
+function addMalformedOrderByHints(compact: string, hints: QueryHint[]) {
+  const orderByMatch = compact.match(/\bORDER\s+BY\s+(.+?)(\bFETCH\b|\bOFFSET\b|$)/i);
+
+  if (!orderByMatch) {
+    return;
+  }
+
+  const orderByText = orderByMatch[1].trim();
+
+  if (!orderByText) {
+    hints.push({
+      severity: 'error',
+      message: 'ORDER BY has no sort expression.',
+      detail: 'Add one or more columns or expressions after ORDER BY.'
+    });
+    return;
+  }
+
+  splitTopLevelComma(orderByText).forEach((expression) => {
+    const normalized = expression.trim();
+    const withoutDirection = normalized.replace(/\s+(ASC|DESC)(\s+NULLS\s+(FIRST|LAST))?$/i, '').trim();
+
+    if (/\b(ASC|DESC)\s+[A-Z_][A-Z0-9_$#.]*(\s+[A-Z_][A-Z0-9_$#.]*)+/i.test(normalized)) {
+      hints.push({
+        severity: 'error',
+        message: 'ORDER BY sort direction is followed by extra tokens.',
+        detail: 'ASC or DESC must end that ORDER BY expression except for optional NULLS FIRST/LAST. Use commas between additional sort expressions.'
+      });
+      return;
+    }
+
+    if (hasRepeatedBareWords(withoutDirection)) {
+      hints.push({
+        severity: 'error',
+        message: 'ORDER BY expression appears malformed.',
+        detail: `The expression "${normalized}" contains repeated bare words. Use commas between sort expressions or remove the extra tokens.`
+      });
+    }
+  });
 }
 
 function addUnsupportedFunctionHints(analysisText: string, hints: QueryHint[]) {
@@ -225,6 +269,14 @@ function addIdentifierHints(query: string, hints: QueryHint[]) {
       severity: 'warning',
       message: 'Square-bracket identifiers detected.',
       detail: 'Oracle and SuiteQL identifiers use unquoted names or double quotes, not SQL Server square brackets.'
+    });
+  }
+
+  if (/(=|<>|!=|<|>|<=|>=)\s*"[^"]+"/.test(query)) {
+    hints.push({
+      severity: 'warning',
+      message: 'Double-quoted comparison value detected.',
+      detail: 'Oracle and SuiteQL treat double quotes as quoted identifiers. Use single quotes for string values, such as t.type = \'SalesOrd\'.'
     });
   }
 }
@@ -264,6 +316,51 @@ function getFunctionCalls(analysisText: string): string[] {
   }
 
   return Array.from(functions);
+}
+
+function maskLiteralsForSyntax(query: string): string {
+  return query.replace(/(--[^\n\r]*|\/\*[\s\S]*?\*\/|'(?:''|[^'])*'|"(?:[^"]|"")*")/g, (match) => {
+    if (match.startsWith('--') || match.startsWith('/*')) {
+      return ' ';
+    }
+
+    return ' VALUE ';
+  });
+}
+
+function splitTopLevelComma(value: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+
+  for (let i = 0; i < value.length; i += 1) {
+    const char = value[i];
+
+    if (char === '(') {
+      depth += 1;
+    } else if (char === ')') {
+      depth = Math.max(0, depth - 1);
+    } else if (char === ',' && depth === 0) {
+      parts.push(value.slice(start, i));
+      start = i + 1;
+    }
+  }
+
+  parts.push(value.slice(start));
+
+  return parts;
+}
+
+function hasRepeatedBareWords(value: string): boolean {
+  const tokens = value.match(/\b[A-Z_][A-Z0-9_$#.]*\b/g) || [];
+
+  if (tokens.length < 3) {
+    return false;
+  }
+
+  const operatorOrKeywordPattern = /\b(CASE|WHEN|THEN|ELSE|END|AND|OR|IN|IS|LIKE|BETWEEN|NULL|OVER|PARTITION|BY)\b|[+\-*\/=<>]/i;
+
+  return !operatorOrKeywordPattern.test(value);
 }
 
 function getBalanceHint(query: string): QueryHint | null {
