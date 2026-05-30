@@ -51,15 +51,12 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
   });
 
   return (
-    <Portlet title={'AI Report & Schema Chat'} icon={SystemIcon.HELP} rootStyle={props.rootStyle}>
-      <StackPanel.Vertical rootStyle={{height: '100%'}} itemGap={StackPanel.GapSize.MEDIUM}>
-        <StackPanel.Item shrink={0}>
-          <StackPanel alignment={StackPanel.Alignment.START}>
-            <StackPanel.Item shrink={0}>
-              <Button label={'Close'} action={props.onClose} />
-            </StackPanel.Item>
-          </StackPanel>
-        </StackPanel.Item>
+    <div style={{height: '100%', position: 'relative'}}>
+      <div style={{position: 'absolute', right: '16px', top: '12px', zIndex: '1'}}>
+        <Button label={'Close'} action={props.onClose} />
+      </div>
+      <Portlet title={'AI Report & Schema Chat'} icon={SystemIcon.HELP} rootStyle={props.rootStyle}>
+        <StackPanel.Vertical rootStyle={{height: '100%'}} itemGap={StackPanel.GapSize.MEDIUM}>
         <StackPanel.Item grow={1}>
           <StackPanel.Vertical rootStyle={{height: '100%'}} itemGap={StackPanel.GapSize.SMALL}>
             <StackPanel.Item shrink={0}>
@@ -119,8 +116,9 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
             </StackPanel.Item>
           </StackPanel.Vertical>
         </StackPanel.Item>
-      </StackPanel.Vertical>
-    </Portlet>
+        </StackPanel.Vertical>
+      </Portlet>
+    </div>
   );
 }
 

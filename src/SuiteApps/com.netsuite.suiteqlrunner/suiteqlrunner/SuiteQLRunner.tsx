@@ -268,13 +268,14 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     ));
 
     return (
-      <Portlet title={'AI Chat History'} icon={SystemIcon.LIST}>
+      <div style={{position: 'relative'}}>
+        <div style={{position: 'absolute', right: '16px', top: '12px', zIndex: '1'}}>
+          <Button label={'Close'} action={() => this.toggleRecordChatHistory()} />
+        </div>
+        <Portlet title={'AI Chat History'} icon={SystemIcon.LIST}>
         <StackPanel.Vertical itemGap={StackPanel.GapSize.MEDIUM}>
           <StackPanel.Item>
             <StackPanel itemGap={StackPanel.GapSize.SMALL}>
-              <StackPanel.Item shrink={0}>
-                <Button label={'Close'} action={() => this.toggleRecordChatHistory()} />
-              </StackPanel.Item>
               <StackPanel.Item shrink={0}>
                 <Button label={'New Chat'} type={Button.Type.PRIMARY} action={() => this.createNewRecordChat()} />
               </StackPanel.Item>
@@ -291,7 +292,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
             </ScrollPanel>
           </StackPanel.Item>
         </StackPanel.Vertical>
-      </Portlet>
+        </Portlet>
+      </div>
     );
   }
 
