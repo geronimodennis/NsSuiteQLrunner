@@ -69,6 +69,8 @@ The AI chat specializes in reports, saved searches, standard NetSuite record typ
 
 AI responses support Markdown, including bullets and fenced SQL examples. Fenced code blocks render as separate code boxes.
 
+When an AI response includes a SQL or SuiteQL code block, use `Insert to SuiteQL Editor` to replace the current editor text with that SQL, or `Merge to Current Query` to append it to the current editor text for comparison or manual editing.
+
 It can still answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the workflow.
 
 Custom records, custom fields, and feature-dependent schema should still be verified in the target account's Records Catalog, Records Browser, or Schema Browser.

@@ -12,6 +12,8 @@ interface RecordChatPanelProps {
   onClear: () => void;
   onClose: () => void;
   onDraftChanged: (draft: string) => void;
+  onInsertSuiteQL: (query: string) => void;
+  onMergeSuiteQL: (query: string) => void;
 }
 
 export function RecordChatPanel(props: RecordChatPanelProps) {
@@ -34,7 +36,7 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
           </StackPanel.Item>
           <StackPanel.Item>
             {message.role === 'assistant' ? (
-              renderMarkdown(message.text)
+              renderMarkdown(message.text, props.onInsertSuiteQL, props.onMergeSuiteQL)
             ) : (
               renderPlainText(message.text)
             )}
@@ -102,11 +104,11 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
   );
 }
 
-function renderMarkdown(text: string) {
+function renderMarkdown(text: string, onInsertSuiteQL: (query: string) => void, onMergeSuiteQL: (query: string) => void) {
   const items = parseMarkdownBlocks(text).map((block, index) => (
     <StackPanel.Item key={`markdown-${index}`}>
       {block.type === 'code' ? (
-        renderCodeBlock(block.content)
+        renderCodeBlock(block.content, block.language, onInsertSuiteQL, onMergeSuiteQL)
       ) : (
         FormattedText.markdown(block.content, {
           wrap: true,
@@ -140,26 +142,51 @@ function renderPlainText(text: string, isError = false) {
   );
 }
 
-function renderCodeBlock(text: string) {
+function renderCodeBlock(
+  text: string,
+  language: string,
+  onInsertSuiteQL: (query: string) => void,
+  onMergeSuiteQL: (query: string) => void
+) {
+  const showSuiteQLActions = isSuiteQLBlock(language, text);
+
   return (
-    <pre
-      style={{
-        backgroundColor: '#f6f8fa',
-        border: '1px solid #d0d7de',
-        borderRadius: '4px',
-        color: '#24292f',
-        fontFamily: 'Consolas, Monaco, "Courier New", monospace',
-        fontSize: '13px',
-        lineHeight: '1.45',
-        margin: '0',
-        overflowX: 'auto',
-        padding: '10px 12px',
-        whiteSpace: 'pre-wrap',
-        wordBreak: 'break-word'
-      }}
-    >
-      {text || ' '}
-    </pre>
+    <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
+      <StackPanel.Item>
+        <pre
+          style={{
+            backgroundColor: '#f6f8fa',
+            border: '1px solid #d0d7de',
+            borderRadius: '4px',
+            color: '#24292f',
+            fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+            fontSize: '13px',
+            lineHeight: '1.45',
+            margin: '0',
+            overflowX: 'auto',
+            padding: '10px 12px',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word'
+          }}
+        >
+          {text || ' '}
+        </pre>
+      </StackPanel.Item>
+      <StackPanel.Item>
+        {showSuiteQLActions ? (
+          <StackPanel alignment={StackPanel.Alignment.CENTER} itemGap={StackPanel.GapSize.SMALL}>
+            <StackPanel.Item shrink={0}>
+              <Button label={'Insert to SuiteQL Editor'} action={() => onInsertSuiteQL(text)} />
+            </StackPanel.Item>
+            <StackPanel.Item shrink={0}>
+              <Button label={'Merge to Current Query'} action={() => onMergeSuiteQL(text)} />
+            </StackPanel.Item>
+          </StackPanel>
+        ) : (
+          <div style={{display: 'none'}} />
+        )}
+      </StackPanel.Item>
+    </StackPanel.Vertical>
   );
 }
 
@@ -220,4 +247,15 @@ function parseCodeFence(language: string, content: string) {
     language: normalizedLanguage,
     content: normalizedContent
   };
+}
+
+function isSuiteQLBlock(language: string, content: string) {
+  const normalizedLanguage = String(language || '').trim().toLowerCase();
+  const normalizedContent = String(content || '').trim();
+
+  if (normalizedLanguage === 'sql' || normalizedLanguage === 'suiteql') {
+    return true;
+  }
+
+  return /^(SELECT|WITH)\b/i.test(normalizedContent) || /\bFROM\s+[A-Za-z0-9_.$"]+/i.test(normalizedContent);
 }

@@ -184,6 +184,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
               onClear={() => this.clearRecordChat()}
               onClose={() => this.closeRecordChat()}
               onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
+              onInsertSuiteQL={(query) => this.insertSuiteQLFromChat(query)}
+              onMergeSuiteQL={(query) => this.mergeSuiteQLFromChat(query)}
             />
           </div>
         </StackPanel.Item>
@@ -235,6 +237,30 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       error: null,
       hints: analyzeSuiteQL(replacement.query),
       suggestions: getCompletions(replacement.query, replacement.caret)
+    });
+  }
+
+  private insertSuiteQLFromChat(query: string) {
+    const nextQuery = query.trim();
+
+    this.setEditorQuery(nextQuery);
+  }
+
+  private mergeSuiteQLFromChat(query: string) {
+    const currentQuery = this.state.query.trim();
+    const incomingQuery = query.trim();
+    const nextQuery = currentQuery ? `${currentQuery}\n\n${incomingQuery}` : incomingQuery;
+
+    this.setEditorQuery(nextQuery);
+  }
+
+  private setEditorQuery(query: string) {
+    this.setState({
+      query,
+      caretPosition: query.length,
+      error: null,
+      hints: analyzeSuiteQL(query),
+      suggestions: getCompletions(query, query.length)
     });
   }
 
