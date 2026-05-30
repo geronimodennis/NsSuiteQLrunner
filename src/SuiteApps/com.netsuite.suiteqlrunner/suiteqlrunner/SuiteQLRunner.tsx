@@ -273,13 +273,13 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
           <StackPanel.Item>
             <StackPanel itemGap={StackPanel.GapSize.SMALL}>
               <StackPanel.Item shrink={0}>
+                <Button label={'Close'} action={() => this.toggleRecordChatHistory()} />
+              </StackPanel.Item>
+              <StackPanel.Item shrink={0}>
                 <Button label={'New Chat'} type={Button.Type.PRIMARY} action={() => this.createNewRecordChat()} />
               </StackPanel.Item>
               <StackPanel.Item shrink={0}>
                 <Button label={'Clear All'} action={() => this.clearRecordChatHistory()} />
-              </StackPanel.Item>
-              <StackPanel.Item shrink={0}>
-                <Button label={'Close'} action={() => this.toggleRecordChatHistory()} />
               </StackPanel.Item>
             </StackPanel>
           </StackPanel.Item>

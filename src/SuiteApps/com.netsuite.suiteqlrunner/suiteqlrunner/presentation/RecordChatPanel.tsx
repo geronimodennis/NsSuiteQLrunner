@@ -54,7 +54,7 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
     <Portlet title={'AI Report & Schema Chat'} icon={SystemIcon.HELP} rootStyle={props.rootStyle}>
       <StackPanel.Vertical rootStyle={{height: '100%'}} itemGap={StackPanel.GapSize.MEDIUM}>
         <StackPanel.Item shrink={0}>
-          <StackPanel alignment={StackPanel.Alignment.END}>
+          <StackPanel alignment={StackPanel.Alignment.START}>
             <StackPanel.Item shrink={0}>
               <Button label={'Close'} action={props.onClose} />
             </StackPanel.Item>
