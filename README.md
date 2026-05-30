@@ -30,6 +30,8 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 ## Features
 
 - SuiteQL editor with Run, Format, Analyze, and AI Chat actions.
+- Chrome-style Query Editor tabs for working on multiple SuiteQL drafts, each with its own Result and SuiteQL Performance Matrix state.
+- Query Editor history for loading, deleting, or clearing saved query-version checkpoints.
 - Blank editor on first use, with automatic restore of the last query saved by Run, Format, or Analyze.
 - MSSQL-style formatting with uppercase keywords and readable clause breaks.
 - Static SuiteQL and Oracle SQL hinting for common errors, malformed query patterns, unsupported functions, and dialect mismatches.
@@ -41,7 +43,7 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
 - `Run as SuiteQLPaged` checkbox for paged execution, with unchecked direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.
-- Result grid rendered immediately below the editor.
+- Result grid rendered immediately below the active editor tab.
 - Error and warning hints appear directly under Query Editor, including SuiteQL execution errors after a failed run.
 - Collapsible Result and SuiteQL Performance Matrix panels so users can fold sections while iterating on a query.
 - Performance matrix for execution mode, API used, fallback status, client validation time, request latency, server execution time, rows, columns, pages, and governance usage.

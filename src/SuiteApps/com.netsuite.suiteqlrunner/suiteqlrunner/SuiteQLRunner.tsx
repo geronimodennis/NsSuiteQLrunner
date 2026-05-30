@@ -9,13 +9,27 @@ import {CompletionItem, QueryExecutionMeta, QueryExecutionMode, QueryHint, Recor
 import {replaceActiveToken} from './domain/queryText';
 import {DEFAULT_MAX_PAGES, DEFAULT_PAGE_SIZE} from './domain/suiteqlCatalog';
 import {NetSuiteRestletQueryGateway} from './infrastructure/NetSuiteRestletQueryGateway';
-import {QueryEditor} from './presentation/QueryEditor';
+import {QueryEditor, QueryHistoryItem} from './presentation/QueryEditor';
 import {QueryDiagnosticsPanel} from './presentation/QueryDiagnosticsPanel';
 import {RecordChatPanel} from './presentation/RecordChatPanel';
 import {ResultsPanel} from './presentation/ResultsPanel';
 
 const WORKING_QUERY_STORAGE_KEY = 'suiteqlrunner.workingQuery';
+const QUERY_HISTORY_STORAGE_KEY = 'suiteqlrunner.queryHistory';
 const RECORD_CHAT_HISTORY_STORAGE_KEY = 'suiteqlrunner.recordChatHistory';
+
+interface QueryEditorTab {
+  id: string;
+  title: string;
+  query: string;
+  hints: QueryHint[];
+  suggestions: CompletionItem[];
+  resultRows: Record<string, unknown>[];
+  resultColumns: string[];
+  error: string | null;
+  caretPosition: number;
+  performance: QueryExecutionMeta;
+}
 
 interface RecordChatHistoryEntry {
   id: string;
@@ -26,6 +40,9 @@ interface RecordChatHistoryEntry {
 
 interface RunnerState {
   query: string;
+  queryHistory: QueryHistoryItem[];
+  queryHistoryVisible: boolean;
+  queryTabs: QueryEditorTab[];
   hints: QueryHint[];
   suggestions: CompletionItem[];
   resultRows: Record<string, unknown>[];
@@ -47,6 +64,7 @@ interface RunnerState {
   recordChatVisible: boolean;
   activeRecordChatId: string;
   useAiQueryMerge: boolean;
+  activeQueryTabId: string;
 }
 
 export default class SuiteQLRunner extends PureComponent<Record<string, never>, RunnerState> {
@@ -57,11 +75,15 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   constructor(props, context) {
     super(props, context);
     const workingQuery = this.loadWorkingQuery();
+    const initialTab = createQueryEditorTab(workingQuery, 'Query 1');
     const chatHistory = this.loadRecordChatHistory();
     const activeChat = chatHistory[0] || createRecordChatHistoryEntry(initialRecordChatMessages());
 
     this.state = {
       query: workingQuery,
+      queryHistory: this.loadQueryHistory(),
+      queryHistoryVisible: false,
+      queryTabs: [initialTab],
       hints: analyzeSuiteQL(workingQuery),
       suggestions: getCompletions(workingQuery, workingQuery.length),
       resultRows: [],
@@ -82,7 +104,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       recordChatRunning: false,
       recordChatVisible: false,
       activeRecordChatId: activeChat.id,
-      useAiQueryMerge: true
+      useAiQueryMerge: true,
+      activeQueryTabId: initialTab.id
     };
   }
 
@@ -125,9 +148,14 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
           <ContentPanel outerGap={ContentPanel.GapSize.LARGE}>
             <StackPanel.Vertical itemGap={StackPanel.GapSize.LARGE}>
               <StackPanel.Item>
+                {this.renderQueryTabs()}
+              </StackPanel.Item>
+              <StackPanel.Item>
                 <QueryEditor
                   executionError={this.state.error}
                   hints={this.state.hints}
+                  historyItems={this.state.queryHistory}
+                  historyVisible={this.state.queryHistoryVisible}
                   maxPages={this.state.maxPages}
                   pageSize={this.state.pageSize}
                   query={this.state.query}
@@ -135,8 +163,11 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                   running={this.state.running}
                   suggestions={this.state.suggestions}
                   onAnalyze={() => this.analyzeQuery()}
+                  onClearHistory={() => this.clearQueryHistory()}
+                  onDeleteHistoryItem={(id) => this.deleteQueryHistoryItem(id)}
                   onFormat={() => this.formatQuery()}
                   onInsertSuggestion={(suggestion) => this.insertSuggestion(suggestion)}
+                  onLoadHistoryItem={(id) => this.loadQueryHistoryItem(id)}
                   onMaxPagesChanged={(maxPages) => this.setState({maxPages})}
                   onPageSizeChanged={(pageSize) => this.setState({pageSize})}
                   onQueryChanged={(query, caretPosition) => this.onQueryChanged(query, caretPosition)}
@@ -144,6 +175,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
                     this.setState({executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL'})
                   }
                   onRun={() => this.runQuery()}
+                  onToggleHistory={() => this.toggleQueryHistory()}
                   onToggleRecordChat={() => this.toggleRecordChat()}
                 />
               </StackPanel.Item>
@@ -235,6 +267,30 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
     return items;
   }
 
+  private renderQueryTabs() {
+    const tabItems = this.state.queryTabs.map((tab) => (
+      <StackPanel.Item key={tab.id} shrink={0}>
+        <Button
+          label={`<> ${tab.title}`}
+          type={tab.id === this.state.activeQueryTabId ? Button.Type.PRIMARY : Button.Type.DEFAULT}
+          action={() => this.activateQueryTab(tab.id)}
+        />
+      </StackPanel.Item>
+    ));
+
+    return (
+      <StackPanel wrap={true} itemGap={StackPanel.GapSize.SMALL} wrapGap={StackPanel.GapSize.SMALL}>
+        {tabItems}
+        <StackPanel.Item shrink={0}>
+          <Button label={'New Tab'} action={() => this.createQueryTab()} />
+        </StackPanel.Item>
+        <StackPanel.Item shrink={0}>
+          <Button label={'Close Tab'} action={() => this.closeActiveQueryTab()} />
+        </StackPanel.Item>
+      </StackPanel>
+    );
+  }
+
   private renderRecordChatHistoryPanel() {
     const historyItems = this.state.recordChatHistory.map((entry) => (
       <StackPanel.Item key={entry.id}>
@@ -303,11 +359,19 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       caretPosition,
       error: null,
       hints: analyzeSuiteQL(query),
-      suggestions: getCompletions(query, caretPosition)
+      suggestions: getCompletions(query, caretPosition),
+      queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+        query,
+        caretPosition,
+        error: null,
+        hints: analyzeSuiteQL(query),
+        suggestions: getCompletions(query, caretPosition)
+      })
     });
   }
 
   private formatQuery() {
+    this.addQueryHistory(this.state.query, 'Before format');
     const formatted = formatSuiteQL(this.state.query);
     this.saveWorkingQuery(formatted);
 
@@ -316,21 +380,35 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       error: null,
       hints: analyzeSuiteQL(formatted),
       suggestions: getCompletions(formatted, formatted.length),
-      caretPosition: formatted.length
+      caretPosition: formatted.length,
+      queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+        query: formatted,
+        error: null,
+        hints: analyzeSuiteQL(formatted),
+        suggestions: getCompletions(formatted, formatted.length),
+        caretPosition: formatted.length
+      })
     });
   }
 
   private analyzeQuery() {
     this.saveWorkingQuery(this.state.query);
+    this.addQueryHistory(this.state.query, 'Analyze checkpoint');
 
     this.setState({
       error: null,
       hints: analyzeSuiteQL(this.state.query),
-      suggestions: getCompletions(this.state.query, this.state.caretPosition)
+      suggestions: getCompletions(this.state.query, this.state.caretPosition),
+      queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+        error: null,
+        hints: analyzeSuiteQL(this.state.query),
+        suggestions: getCompletions(this.state.query, this.state.caretPosition)
+      })
     });
   }
 
   private insertSuggestion(suggestion: CompletionItem) {
+    this.addQueryHistory(this.state.query, 'Before autocomplete insert');
     const replacement = replaceActiveToken(this.state.query, this.state.caretPosition, suggestion.insert);
 
     this.setState({
@@ -338,7 +416,14 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       caretPosition: replacement.caret,
       error: null,
       hints: analyzeSuiteQL(replacement.query),
-      suggestions: getCompletions(replacement.query, replacement.caret)
+      suggestions: getCompletions(replacement.query, replacement.caret),
+      queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+        query: replacement.query,
+        caretPosition: replacement.caret,
+        error: null,
+        hints: analyzeSuiteQL(replacement.query),
+        suggestions: getCompletions(replacement.query, replacement.caret)
+      })
     });
   }
 
@@ -397,17 +482,26 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   }
 
   private setEditorQuery(query: string) {
+    this.addQueryHistory(this.state.query, 'Before editor replace');
     this.setState({
       query,
       caretPosition: query.length,
       error: null,
       hints: analyzeSuiteQL(query),
-      suggestions: getCompletions(query, query.length)
+      suggestions: getCompletions(query, query.length),
+      queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+        query,
+        caretPosition: query.length,
+        error: null,
+        hints: analyzeSuiteQL(query),
+        suggestions: getCompletions(query, query.length)
+      })
     });
   }
 
   private async runQuery() {
     this.saveWorkingQuery(this.state.query);
+    this.addQueryHistory(this.state.query, 'Run checkpoint');
 
     this.setState({
       running: true,
@@ -428,8 +522,143 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       error: outcome.error,
       resultRows: outcome.resultRows,
       resultColumns: outcome.resultColumns,
-      performance: outcome.performance
+      performance: outcome.performance,
+      queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+        hints: outcome.hints,
+        error: outcome.error,
+        resultRows: outcome.resultRows,
+        resultColumns: outcome.resultColumns,
+        performance: outcome.performance
+      })
     });
+  }
+
+  private activateQueryTab(id: string) {
+    const tab = this.state.queryTabs.find((item) => item.id === id);
+
+    if (!tab) {
+      return;
+    }
+
+    this.setState({
+      activeQueryTabId: tab.id,
+      query: tab.query,
+      hints: tab.hints,
+      suggestions: tab.suggestions,
+      resultRows: tab.resultRows,
+      resultColumns: tab.resultColumns,
+      error: tab.error,
+      caretPosition: tab.caretPosition,
+      performance: tab.performance
+    });
+  }
+
+  private createQueryTab() {
+    const tab = createQueryEditorTab('', `Query ${this.state.queryTabs.length + 1}`);
+    const queryTabs = [...this.state.queryTabs, tab];
+
+    this.setState({
+      activeQueryTabId: tab.id,
+      queryTabs,
+      query: tab.query,
+      hints: tab.hints,
+      suggestions: tab.suggestions,
+      resultRows: tab.resultRows,
+      resultColumns: tab.resultColumns,
+      error: tab.error,
+      caretPosition: tab.caretPosition,
+      performance: tab.performance
+    });
+  }
+
+  private closeActiveQueryTab() {
+    if (this.state.queryTabs.length === 1) {
+      const tab = createQueryEditorTab('', 'Query 1');
+
+      this.setState({
+        activeQueryTabId: tab.id,
+        queryTabs: [tab],
+        query: tab.query,
+        hints: tab.hints,
+        suggestions: tab.suggestions,
+        resultRows: tab.resultRows,
+        resultColumns: tab.resultColumns,
+        error: tab.error,
+        caretPosition: tab.caretPosition,
+        performance: tab.performance
+      });
+      return;
+    }
+
+    const remainingTabs = this.state.queryTabs.filter((tab) => tab.id !== this.state.activeQueryTabId);
+    const nextTabs = remainingTabs.length > 0 ? remainingTabs : [createQueryEditorTab('', 'Query 1')];
+    const nextTab = nextTabs[0];
+
+    this.setState({
+      activeQueryTabId: nextTab.id,
+      queryTabs: nextTabs,
+      query: nextTab.query,
+      hints: nextTab.hints,
+      suggestions: nextTab.suggestions,
+      resultRows: nextTab.resultRows,
+      resultColumns: nextTab.resultColumns,
+      error: nextTab.error,
+      caretPosition: nextTab.caretPosition,
+      performance: nextTab.performance
+    });
+  }
+
+  private toggleQueryHistory() {
+    this.setState({
+      queryHistoryVisible: !this.state.queryHistoryVisible
+    });
+  }
+
+  private loadQueryHistoryItem(id: string) {
+    const item = this.state.queryHistory.find((historyItem) => historyItem.id === id);
+
+    if (!item) {
+      return;
+    }
+
+    this.setEditorQuery(item.query);
+  }
+
+  private deleteQueryHistoryItem(id: string) {
+    const queryHistory = this.state.queryHistory.filter((item) => item.id !== id);
+
+    this.saveQueryHistory(queryHistory);
+    this.setState({queryHistory});
+  }
+
+  private clearQueryHistory() {
+    this.saveQueryHistory([]);
+    this.setState({queryHistory: []});
+  }
+
+  private addQueryHistory(query: string, reason: string) {
+    const normalizedQuery = String(query || '').trim();
+
+    if (!normalizedQuery) {
+      return;
+    }
+
+    if (this.state.queryHistory[0] && this.state.queryHistory[0].query === normalizedQuery) {
+      return;
+    }
+
+    const queryHistory = [
+      {
+        id: `query-history-${Date.now()}-${Math.round(Math.random() * 100000)}`,
+        title: `${reason}: ${titleQuery(normalizedQuery)}`,
+        query: normalizedQuery,
+        updatedAt: Date.now()
+      },
+      ...this.state.queryHistory
+    ].slice(0, 30);
+
+    this.saveQueryHistory(queryHistory);
+    this.setState({queryHistory});
   }
 
   private async askRecordChat() {
@@ -568,6 +797,36 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       return window.localStorage.getItem(WORKING_QUERY_STORAGE_KEY) || '';
     } catch {
       return '';
+    }
+  }
+
+  private loadQueryHistory(): QueryHistoryItem[] {
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(QUERY_HISTORY_STORAGE_KEY) || '[]');
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed
+        .filter((item) => item && typeof item.id === 'string' && typeof item.query === 'string')
+        .map((item) => ({
+          id: item.id,
+          title: String(item.title || titleQuery(item.query)),
+          query: String(item.query || ''),
+          updatedAt: Number(item.updatedAt || Date.now())
+        }))
+        .slice(0, 30);
+    } catch {
+      return [];
+    }
+  }
+
+  private saveQueryHistory(history: QueryHistoryItem[]) {
+    try {
+      window.localStorage.setItem(QUERY_HISTORY_STORAGE_KEY, JSON.stringify(history.slice(0, 30)));
+    } catch {
+      // Query history persistence is best-effort; browser or account policy can block storage.
     }
   }
 
@@ -740,4 +999,37 @@ function formatHistoryDate(value: number) {
   }
 
   return date.toLocaleString();
+}
+
+function createQueryEditorTab(query: string, title: string): QueryEditorTab {
+  return {
+    id: `query-tab-${Date.now()}-${Math.round(Math.random() * 100000)}`,
+    title,
+    query,
+    hints: analyzeSuiteQL(query),
+    suggestions: getCompletions(query, query.length),
+    resultRows: [],
+    resultColumns: [],
+    error: null,
+    caretPosition: query.length,
+    performance: {}
+  };
+}
+
+function updateActiveQueryTab(
+  tabs: QueryEditorTab[],
+  activeId: string,
+  patch: Partial<QueryEditorTab>
+): QueryEditorTab[] {
+  return tabs.map((tab) => (tab.id === activeId ? {...tab, ...patch} : tab));
+}
+
+function titleQuery(query: string) {
+  const compact = String(query || '').replace(/\s+/g, ' ').trim();
+
+  if (!compact) {
+    return 'Empty query';
+  }
+
+  return compact.length > 48 ? `${compact.slice(0, 45)}...` : compact;
 }

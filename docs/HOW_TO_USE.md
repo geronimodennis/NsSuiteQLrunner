@@ -14,9 +14,13 @@ The query runs through the RESTlet as the current NetSuite user, so role permiss
 
 Use the Query Editor for the SuiteQL statement.
 
+Use the query tabs above Query Editor to keep multiple SuiteQL drafts open. Each tab keeps its own editor text, Result panel, SuiteQL hints, and SuiteQL Performance Matrix values. Select `New Tab` to start another draft, or `Close Tab` to close the active draft.
+
 The editor starts blank on first use. When you select `Run SuiteQL`, `Format SuiteQL`, or `Analyze`, the current query is saved in browser storage and restored automatically when you leave the page and come back.
 
 Use `Format SuiteQL` to clean up keyword casing and line breaks. Use `Analyze` to refresh local hints before running.
+
+Select `Editor History` at the bottom-right of Query Editor to open query-version history. The app saves checkpoints for material editor actions such as Run, Format, Analyze, autocomplete insert, AI insert, and AI merge. Use `Load` to restore a saved query version, `Delete` to remove one history item, or `Clear All` to remove all query history.
 
 ## 3. Use Autocomplete and Hints
 
@@ -48,6 +52,8 @@ After execution, review:
 - `SuiteQL Performance Matrix`: API used, latency, server time, row counts, page counts, truncation, and governance usage.
 
 The Result panel appears directly below Query Editor. Result and SuiteQL Performance Matrix can be collapsed or expanded from their panel headers.
+
+When you switch query tabs, Result and SuiteQL Performance Matrix switch with the active tab.
 
 ## 6. Ask AI About Reports, Searches, And Records
 

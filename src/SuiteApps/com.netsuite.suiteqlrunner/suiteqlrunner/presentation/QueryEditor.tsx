@@ -1,10 +1,12 @@
-import {Button, CheckBox, Portlet, StackPanel, Text, TextArea, TextBox} from '@uif-js/component';
+import {Button, CheckBox, Portlet, ScrollPanel, StackPanel, Text, TextArea, TextBox} from '@uif-js/component';
 import {SystemIcon} from '@uif-js/core';
 import {CompletionItem, QueryHint} from '../domain/models';
 
 interface QueryEditorProps {
   executionError: string | null;
   hints: QueryHint[];
+  historyItems: QueryHistoryItem[];
+  historyVisible: boolean;
   maxPages: string;
   pageSize: string;
   query: string;
@@ -12,14 +14,25 @@ interface QueryEditorProps {
   running: boolean;
   suggestions: CompletionItem[];
   onAnalyze: () => void;
+  onClearHistory: () => void;
+  onDeleteHistoryItem: (id: string) => void;
   onFormat: () => void;
+  onLoadHistoryItem: (id: string) => void;
   onMaxPagesChanged: (maxPages: string) => void;
   onPageSizeChanged: (pageSize: string) => void;
   onQueryChanged: (query: string, caretPosition: number) => void;
   onRunAsSuiteQLPagedChanged: (value: boolean) => void;
   onRun: () => void;
+  onToggleHistory: () => void;
   onToggleRecordChat: () => void;
   onInsertSuggestion: (suggestion: CompletionItem) => void;
+}
+
+export interface QueryHistoryItem {
+  id: string;
+  title: string;
+  query: string;
+  updatedAt: number;
 }
 
 export function QueryEditor(props: QueryEditorProps) {
@@ -122,9 +135,92 @@ export function QueryEditor(props: QueryEditorProps) {
             {autocompleteItems.length > 0 ? autocompleteItems : <StackPanel.Item shrink={0}><div style={{display: 'none'}} /></StackPanel.Item>}
           </StackPanel>
         </StackPanel.Item>
+        <StackPanel.Item>
+          <StackPanel alignment={StackPanel.Alignment.END}>
+            <StackPanel.Item shrink={0}>
+              <Button label={'Editor History'} icon={SystemIcon.LIST} action={props.onToggleHistory} />
+            </StackPanel.Item>
+          </StackPanel>
+        </StackPanel.Item>
+        <StackPanel.Item>
+          {props.historyVisible ? renderHistoryPanel(props) : <div style={{display: 'none'}} />}
+        </StackPanel.Item>
       </StackPanel.Vertical>
     </Portlet>
   );
+}
+
+function renderHistoryPanel(props: QueryEditorProps) {
+  const historyItems = props.historyItems.map((item) => (
+    <StackPanel.Item key={item.id}>
+      <div
+        style={{
+          border: '1px solid #d5dce8',
+          borderRadius: '4px',
+          padding: '8px'
+        }}
+      >
+        <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
+          <StackPanel.Item>
+            <Text>{item.title}</Text>
+          </StackPanel.Item>
+          <StackPanel.Item>
+            <Text color={Text.Color.SECONDARY}>{formatHistoryDate(item.updatedAt)}</Text>
+          </StackPanel.Item>
+          <StackPanel.Item>
+            <StackPanel itemGap={StackPanel.GapSize.SMALL}>
+              <StackPanel.Item shrink={0}>
+                <Button label={'Load'} action={() => props.onLoadHistoryItem(item.id)} />
+              </StackPanel.Item>
+              <StackPanel.Item shrink={0}>
+                <Button label={'Delete'} action={() => props.onDeleteHistoryItem(item.id)} />
+              </StackPanel.Item>
+            </StackPanel>
+          </StackPanel.Item>
+        </StackPanel.Vertical>
+      </div>
+    </StackPanel.Item>
+  ));
+
+  return (
+    <div
+      style={{
+        border: '1px solid #d5dce8',
+        borderRadius: '4px',
+        padding: '10px'
+      }}
+    >
+      <StackPanel.Vertical itemGap={StackPanel.GapSize.MEDIUM}>
+        <StackPanel.Item>
+          <StackPanel alignment={StackPanel.Alignment.CENTER} itemGap={StackPanel.GapSize.SMALL}>
+            <StackPanel.Item grow={1}>
+              <Text color={Text.Color.SECONDARY}>Query Editor History</Text>
+            </StackPanel.Item>
+            <StackPanel.Item shrink={0}>
+              <Button label={'Clear All'} action={props.onClearHistory} />
+            </StackPanel.Item>
+          </StackPanel>
+        </StackPanel.Item>
+        <StackPanel.Item>
+          <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL} rootStyle={{maxHeight: '220px'}}>
+            <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
+              {historyItems.length > 0 ? historyItems : <StackPanel.Item><Text color={Text.Color.SECONDARY}>No query history yet.</Text></StackPanel.Item>}
+            </StackPanel.Vertical>
+          </ScrollPanel>
+        </StackPanel.Item>
+      </StackPanel.Vertical>
+    </div>
+  );
+}
+
+function formatHistoryDate(value: number) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleString();
 }
 
 function getActionableHints(hints: QueryHint[], executionError: string | null): QueryHint[] {

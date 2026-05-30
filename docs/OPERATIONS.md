@@ -9,15 +9,18 @@ It should not be exposed as a broad reporting portal.
 ## Running Queries
 
 1. Enter SuiteQL in the editor.
-2. Use Format to normalize keyword casing and clause layout.
-3. Review hints for likely SuiteQL or Oracle SQL issues.
-4. Select `AI Chat` in the Query Editor when you need help with reports, saved searches, standard NetSuite record type IDs, SuiteQL sources, transaction type codes, joins, table relationships, or schema patterns.
-5. Check `Run as SuiteQLPaged` for paged execution, or leave it unchecked for direct `runSuiteQL`.
-6. Set rows per page and max pages.
-7. Run SuiteQL.
-8. Review the result grid and performance matrix.
+2. Use query tabs when comparing multiple drafts. Each tab keeps its own Result and Performance Matrix state.
+3. Use Format to normalize keyword casing and clause layout.
+4. Review hints for likely SuiteQL or Oracle SQL issues.
+5. Select `AI Chat` in the Query Editor when you need help with reports, saved searches, standard NetSuite record type IDs, SuiteQL sources, transaction type codes, joins, table relationships, or schema patterns.
+6. Check `Run as SuiteQLPaged` for paged execution, or leave it unchecked for direct `runSuiteQL`.
+7. Set rows per page and max pages.
+8. Run SuiteQL.
+9. Review the result grid and performance matrix.
 
 Hints are advisory. They never disable the Run button.
+
+Query Editor history is browser-local and stores recent query checkpoints for material editor actions. Users can load, delete, or clear history from the `Editor History` control at the bottom-right of Query Editor.
 
 ## Performance Matrix
 

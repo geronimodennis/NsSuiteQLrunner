@@ -990,7 +990,26 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         return (jsxRuntime.jsx(component.Portlet, { title: 'Query Editor', icon: core.SystemIcon.EDIT, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Running...' : 'Run SuiteQL', type: component.Button.Type.PRIMARY, action: props.onRun }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Format SuiteQL', action: props.onFormat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Analyze', action: props.onAnalyze }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'AI Chat', action: props.onToggleRecordChat }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Run as SuiteQLPaged', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.runAsSuiteQLPaged, action: ({ value }) => props.onRunAsSuiteQLPagedChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.pageSize, placeholder: 'Rows/page', onTextChanged: ({ text }) => props.onPageSizeChanged(text), rootStyle: { width: '110px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.TextBox, { text: props.maxPages, placeholder: 'Pages', onTextChanged: ({ text }) => props.onMaxPagesChanged(text), rootStyle: { width: '90px' } }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Paged mode fetches multiple pages. Direct mode falls back to paged results when the result appears capped." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.query, rowCount: 18, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, autoComplete: 'off', rootStyle: {
                                 fontFamily: 'Consolas, Monaco, monospace',
                                 width: '100%'
-                            }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: actionableHints.length > 0 ? (jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Hints" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: actionableHints.map((hint, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: renderHint(hint) }, `${hint.severity}-${index}`))) }) })] })) : (jsxRuntime.jsx("div", { style: { display: 'none' } })) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: autocompleteItems.length > 0 ? autocompleteItems : jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("div", { style: { display: 'none' } }) }) }) })] }) }));
+                            }, onTextChanged: (args, sender) => props.onQueryChanged(args.text, sender.selection.end || args.text.length) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: actionableHints.length > 0 ? (jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "SuiteQL Hints" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: actionableHints.map((hint, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: renderHint(hint) }, `${hint.severity}-${index}`))) }) })] })) : (jsxRuntime.jsx("div", { style: { display: 'none' } })) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: autocompleteItems.length > 0 ? autocompleteItems : jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("div", { style: { display: 'none' } }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Editor History', icon: core.SystemIcon.LIST, action: props.onToggleHistory }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: props.historyVisible ? renderHistoryPanel(props) : jsxRuntime.jsx("div", { style: { display: 'none' } }) })] }) }));
+    }
+    function renderHistoryPanel(props) {
+        const historyItems = props.historyItems.map((item) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx("div", { style: {
+                    border: '1px solid #d5dce8',
+                    borderRadius: '4px',
+                    padding: '8px'
+                }, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { children: item.title }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: formatHistoryDate$1(item.updatedAt) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Load', action: () => props.onLoadHistoryItem(item.id) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Delete', action: () => props.onDeleteHistoryItem(item.id) }) })] }) })] }) }) }, item.id)));
+        return (jsxRuntime.jsx("div", { style: {
+                border: '1px solid #d5dce8',
+                borderRadius: '4px',
+                padding: '10px'
+            }, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Query Editor History" }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear All', action: props.onClearHistory }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { maxHeight: '220px' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: historyItems.length > 0 ? historyItems : jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No query history yet." }) }) }) }) })] }) }));
+    }
+    function formatHistoryDate$1(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        return date.toLocaleString();
     }
     function getActionableHints(hints, executionError) {
         const actionableHints = (hints || []).filter((hint) => hint.severity === 'error' || hint.severity === 'warning');
@@ -1191,6 +1210,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     }
 
     const WORKING_QUERY_STORAGE_KEY = 'suiteqlrunner.workingQuery';
+    const QUERY_HISTORY_STORAGE_KEY = 'suiteqlrunner.queryHistory';
     const RECORD_CHAT_HISTORY_STORAGE_KEY = 'suiteqlrunner.recordChatHistory';
     class SuiteQLRunner extends core.PureComponent {
         restletGateway = new NetSuiteRestletQueryGateway();
@@ -1199,10 +1219,14 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         constructor(props, context) {
             super(props, context);
             const workingQuery = this.loadWorkingQuery();
+            const initialTab = createQueryEditorTab(workingQuery, 'Query 1');
             const chatHistory = this.loadRecordChatHistory();
             const activeChat = chatHistory[0] || createRecordChatHistoryEntry(initialRecordChatMessages());
             this.state = {
                 query: workingQuery,
+                queryHistory: this.loadQueryHistory(),
+                queryHistoryVisible: false,
+                queryTabs: [initialTab],
                 hints: analyzeSuiteQL(workingQuery),
                 suggestions: getCompletions(workingQuery, workingQuery.length),
                 resultRows: [],
@@ -1223,7 +1247,8 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 recordChatRunning: false,
                 recordChatVisible: false,
                 activeRecordChatId: activeChat.id,
-                useAiQueryMerge: true
+                useAiQueryMerge: true,
+                activeQueryTabId: initialTab.id
             };
         }
         render() {
@@ -1239,7 +1264,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                                     textDecoration: 'none',
                                     top: '14px'
                                 }, children: "dgenticdrive.com" })] }) }, 'header'),
-                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { executionError: this.state.error, hints: this.state.hints, maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { performance: this.state.performance }) })] }) }) }) }, 'main')
+                jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, children: jsxRuntime.jsx(component.ContentPanel, { outerGap: component.ContentPanel.GapSize.LARGE, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.LARGE, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: this.renderQueryTabs() }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryEditor, { executionError: this.state.error, hints: this.state.hints, historyItems: this.state.queryHistory, historyVisible: this.state.queryHistoryVisible, maxPages: this.state.maxPages, pageSize: this.state.pageSize, query: this.state.query, runAsSuiteQLPaged: this.state.executionMode === 'RUN_SUITEQL_PAGED', running: this.state.running, suggestions: this.state.suggestions, onAnalyze: () => this.analyzeQuery(), onClearHistory: () => this.clearQueryHistory(), onDeleteHistoryItem: (id) => this.deleteQueryHistoryItem(id), onFormat: () => this.formatQuery(), onInsertSuggestion: (suggestion) => this.insertSuggestion(suggestion), onLoadHistoryItem: (id) => this.loadQueryHistoryItem(id), onMaxPagesChanged: (maxPages) => this.setState({ maxPages }), onPageSizeChanged: (pageSize) => this.setState({ pageSize }), onQueryChanged: (query, caretPosition) => this.onQueryChanged(query, caretPosition), onRunAsSuiteQLPagedChanged: (runAsSuiteQLPaged) => this.setState({ executionMode: runAsSuiteQLPaged ? 'RUN_SUITEQL_PAGED' : 'RUN_SUITEQL' }), onRun: () => this.runQuery(), onToggleHistory: () => this.toggleQueryHistory(), onToggleRecordChat: () => this.toggleRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(ResultsPanel, { columns: this.state.resultColumns, error: this.state.error, rows: this.state.resultRows }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(QueryDiagnosticsPanel, { performance: this.state.performance }) })] }) }) }) }, 'main')
             ];
             if (this.state.recordChatVisible) {
                 items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx("div", { style: {
@@ -1278,6 +1303,10 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             }
             return items;
         }
+        renderQueryTabs() {
+            const tabItems = this.state.queryTabs.map((tab) => (jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: `<> ${tab.title}`, type: tab.id === this.state.activeQueryTabId ? component.Button.Type.PRIMARY : component.Button.Type.DEFAULT, action: () => this.activateQueryTab(tab.id) }) }, tab.id)));
+            return (jsxRuntime.jsxs(component.StackPanel, { wrap: true, itemGap: component.StackPanel.GapSize.SMALL, wrapGap: component.StackPanel.GapSize.SMALL, children: [tabItems, jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'New Tab', action: () => this.createQueryTab() }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close Tab', action: () => this.closeActiveQueryTab() }) })] }));
+        }
         renderRecordChatHistoryPanel() {
             const historyItems = this.state.recordChatHistory.map((entry) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx("div", { style: {
                         border: entry.id === this.state.activeRecordChatId ? '1px solid #6f85a8' : '1px solid #d5dce8',
@@ -1292,10 +1321,18 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 caretPosition,
                 error: null,
                 hints: analyzeSuiteQL(query),
-                suggestions: getCompletions(query, caretPosition)
+                suggestions: getCompletions(query, caretPosition),
+                queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+                    query,
+                    caretPosition,
+                    error: null,
+                    hints: analyzeSuiteQL(query),
+                    suggestions: getCompletions(query, caretPosition)
+                })
             });
         }
         formatQuery() {
+            this.addQueryHistory(this.state.query, 'Before format');
             const formatted = formatSuiteQL(this.state.query);
             this.saveWorkingQuery(formatted);
             this.setState({
@@ -1303,25 +1340,46 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 error: null,
                 hints: analyzeSuiteQL(formatted),
                 suggestions: getCompletions(formatted, formatted.length),
-                caretPosition: formatted.length
+                caretPosition: formatted.length,
+                queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+                    query: formatted,
+                    error: null,
+                    hints: analyzeSuiteQL(formatted),
+                    suggestions: getCompletions(formatted, formatted.length),
+                    caretPosition: formatted.length
+                })
             });
         }
         analyzeQuery() {
             this.saveWorkingQuery(this.state.query);
+            this.addQueryHistory(this.state.query, 'Analyze checkpoint');
             this.setState({
                 error: null,
                 hints: analyzeSuiteQL(this.state.query),
-                suggestions: getCompletions(this.state.query, this.state.caretPosition)
+                suggestions: getCompletions(this.state.query, this.state.caretPosition),
+                queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+                    error: null,
+                    hints: analyzeSuiteQL(this.state.query),
+                    suggestions: getCompletions(this.state.query, this.state.caretPosition)
+                })
             });
         }
         insertSuggestion(suggestion) {
+            this.addQueryHistory(this.state.query, 'Before autocomplete insert');
             const replacement = replaceActiveToken(this.state.query, this.state.caretPosition, suggestion.insert);
             this.setState({
                 query: replacement.query,
                 caretPosition: replacement.caret,
                 error: null,
                 hints: analyzeSuiteQL(replacement.query),
-                suggestions: getCompletions(replacement.query, replacement.caret)
+                suggestions: getCompletions(replacement.query, replacement.caret),
+                queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+                    query: replacement.query,
+                    caretPosition: replacement.caret,
+                    error: null,
+                    hints: analyzeSuiteQL(replacement.query),
+                    suggestions: getCompletions(replacement.query, replacement.caret)
+                })
             });
         }
         insertSuiteQLFromChat(query) {
@@ -1366,16 +1424,25 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             }
         }
         setEditorQuery(query) {
+            this.addQueryHistory(this.state.query, 'Before editor replace');
             this.setState({
                 query,
                 caretPosition: query.length,
                 error: null,
                 hints: analyzeSuiteQL(query),
-                suggestions: getCompletions(query, query.length)
+                suggestions: getCompletions(query, query.length),
+                queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+                    query,
+                    caretPosition: query.length,
+                    error: null,
+                    hints: analyzeSuiteQL(query),
+                    suggestions: getCompletions(query, query.length)
+                })
             });
         }
         async runQuery() {
             this.saveWorkingQuery(this.state.query);
+            this.addQueryHistory(this.state.query, 'Run checkpoint');
             this.setState({
                 running: true,
                 error: null,
@@ -1393,8 +1460,122 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 error: outcome.error,
                 resultRows: outcome.resultRows,
                 resultColumns: outcome.resultColumns,
-                performance: outcome.performance
+                performance: outcome.performance,
+                queryTabs: updateActiveQueryTab(this.state.queryTabs, this.state.activeQueryTabId, {
+                    hints: outcome.hints,
+                    error: outcome.error,
+                    resultRows: outcome.resultRows,
+                    resultColumns: outcome.resultColumns,
+                    performance: outcome.performance
+                })
             });
+        }
+        activateQueryTab(id) {
+            const tab = this.state.queryTabs.find((item) => item.id === id);
+            if (!tab) {
+                return;
+            }
+            this.setState({
+                activeQueryTabId: tab.id,
+                query: tab.query,
+                hints: tab.hints,
+                suggestions: tab.suggestions,
+                resultRows: tab.resultRows,
+                resultColumns: tab.resultColumns,
+                error: tab.error,
+                caretPosition: tab.caretPosition,
+                performance: tab.performance
+            });
+        }
+        createQueryTab() {
+            const tab = createQueryEditorTab('', `Query ${this.state.queryTabs.length + 1}`);
+            const queryTabs = [...this.state.queryTabs, tab];
+            this.setState({
+                activeQueryTabId: tab.id,
+                queryTabs,
+                query: tab.query,
+                hints: tab.hints,
+                suggestions: tab.suggestions,
+                resultRows: tab.resultRows,
+                resultColumns: tab.resultColumns,
+                error: tab.error,
+                caretPosition: tab.caretPosition,
+                performance: tab.performance
+            });
+        }
+        closeActiveQueryTab() {
+            if (this.state.queryTabs.length === 1) {
+                const tab = createQueryEditorTab('', 'Query 1');
+                this.setState({
+                    activeQueryTabId: tab.id,
+                    queryTabs: [tab],
+                    query: tab.query,
+                    hints: tab.hints,
+                    suggestions: tab.suggestions,
+                    resultRows: tab.resultRows,
+                    resultColumns: tab.resultColumns,
+                    error: tab.error,
+                    caretPosition: tab.caretPosition,
+                    performance: tab.performance
+                });
+                return;
+            }
+            const remainingTabs = this.state.queryTabs.filter((tab) => tab.id !== this.state.activeQueryTabId);
+            const nextTabs = remainingTabs.length > 0 ? remainingTabs : [createQueryEditorTab('', 'Query 1')];
+            const nextTab = nextTabs[0];
+            this.setState({
+                activeQueryTabId: nextTab.id,
+                queryTabs: nextTabs,
+                query: nextTab.query,
+                hints: nextTab.hints,
+                suggestions: nextTab.suggestions,
+                resultRows: nextTab.resultRows,
+                resultColumns: nextTab.resultColumns,
+                error: nextTab.error,
+                caretPosition: nextTab.caretPosition,
+                performance: nextTab.performance
+            });
+        }
+        toggleQueryHistory() {
+            this.setState({
+                queryHistoryVisible: !this.state.queryHistoryVisible
+            });
+        }
+        loadQueryHistoryItem(id) {
+            const item = this.state.queryHistory.find((historyItem) => historyItem.id === id);
+            if (!item) {
+                return;
+            }
+            this.setEditorQuery(item.query);
+        }
+        deleteQueryHistoryItem(id) {
+            const queryHistory = this.state.queryHistory.filter((item) => item.id !== id);
+            this.saveQueryHistory(queryHistory);
+            this.setState({ queryHistory });
+        }
+        clearQueryHistory() {
+            this.saveQueryHistory([]);
+            this.setState({ queryHistory: [] });
+        }
+        addQueryHistory(query, reason) {
+            const normalizedQuery = String(query || '').trim();
+            if (!normalizedQuery) {
+                return;
+            }
+            if (this.state.queryHistory[0] && this.state.queryHistory[0].query === normalizedQuery) {
+                return;
+            }
+            const queryHistory = [
+                {
+                    id: `query-history-${Date.now()}-${Math.round(Math.random() * 100000)}`,
+                    title: `${reason}: ${titleQuery(normalizedQuery)}`,
+                    query: normalizedQuery,
+                    updatedAt: Date.now()
+                },
+                ...this.state.queryHistory
+            ].slice(0, 30);
+            this.saveQueryHistory(queryHistory);
+            this.setState({ queryHistory });
         }
         async askRecordChat() {
             this.setState({
@@ -1507,6 +1688,34 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             }
             catch {
                 return '';
+            }
+        }
+        loadQueryHistory() {
+            try {
+                const parsed = JSON.parse(window.localStorage.getItem(QUERY_HISTORY_STORAGE_KEY) || '[]');
+                if (!Array.isArray(parsed)) {
+                    return [];
+                }
+                return parsed
+                    .filter((item) => item && typeof item.id === 'string' && typeof item.query === 'string')
+                    .map((item) => ({
+                    id: item.id,
+                    title: String(item.title || titleQuery(item.query)),
+                    query: String(item.query || ''),
+                    updatedAt: Number(item.updatedAt || Date.now())
+                }))
+                    .slice(0, 30);
+            }
+            catch {
+                return [];
+            }
+        }
+        saveQueryHistory(history) {
+            try {
+                window.localStorage.setItem(QUERY_HISTORY_STORAGE_KEY, JSON.stringify(history.slice(0, 30)));
+            }
+            catch {
+                // Query history persistence is best-effort; browser or account policy can block storage.
             }
         }
         loadRecordChatHistory() {
@@ -1647,6 +1856,30 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             return '';
         }
         return date.toLocaleString();
+    }
+    function createQueryEditorTab(query, title) {
+        return {
+            id: `query-tab-${Date.now()}-${Math.round(Math.random() * 100000)}`,
+            title,
+            query,
+            hints: analyzeSuiteQL(query),
+            suggestions: getCompletions(query, query.length),
+            resultRows: [],
+            resultColumns: [],
+            error: null,
+            caretPosition: query.length,
+            performance: {}
+        };
+    }
+    function updateActiveQueryTab(tabs, activeId, patch) {
+        return tabs.map((tab) => (tab.id === activeId ? { ...tab, ...patch } : tab));
+    }
+    function titleQuery(query) {
+        const compact = String(query || '').replace(/\s+/g, ' ').trim();
+        if (!compact) {
+            return 'Empty query';
+        }
+        return compact.length > 48 ? `${compact.slice(0, 45)}...` : compact;
     }
 
     const run = (context) => {
