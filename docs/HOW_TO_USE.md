@@ -71,6 +71,17 @@ AI responses support Markdown, including bullets and fenced SQL examples. Fenced
 
 When an AI response includes a SQL or SuiteQL code block, use `Insert to Query Editor` to replace the current editor text with that SQL, or `Merge to Current Query` to combine it with the current editor text. The `Use AI query merging` checkbox controls whether merge asks NetSuite AI to produce one combined query. AI merging may use NetSuite AI tokens; when AI is unavailable, the app shows a warning and falls back to a basic append-style merge.
 
+### Use AI Chat History
+
+Use `History` in the AI chat tool row to open the AI Chat History panel.
+
+- `New Chat` starts a separate conversation while keeping previous chats in history.
+- `Load` restores a previous chat into the active chat panel.
+- `Delete` removes one saved chat.
+- `Clear All` removes all saved chats and starts a fresh conversation.
+
+Chat history is saved in browser storage for the current browser profile. It is not shared across browsers or devices, and clearing browser storage removes it.
+
 It can still answer broader NetSuite, SuiteQL, SuiteScript, SDF, analytics, and reporting questions when that helps the workflow.
 
 Custom records, custom fields, and feature-dependent schema should still be verified in the target account's Records Catalog, Records Browser, or Schema Browser.

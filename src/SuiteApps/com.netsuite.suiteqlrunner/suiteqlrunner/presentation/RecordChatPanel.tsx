@@ -16,6 +16,7 @@ interface RecordChatPanelProps {
   onDraftChanged: (draft: string) => void;
   onInsertSuiteQL: (query: string) => void;
   onMergeSuiteQL: (query: string) => void;
+  onToggleHistory: () => void;
   onUseAiQueryMergeChanged: (useAiQueryMerge: boolean) => void;
 }
 
@@ -77,21 +78,6 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
               <Text color={Text.Color.SECONDARY}>AI chat tool</Text>
             </StackPanel.Item>
             <StackPanel.Item>
-              <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
-                <StackPanel.Item>
-                  <CheckBox
-                    label={'Use AI query merging'}
-                    labelPosition={CheckBox.LabelPosition.RIGHT}
-                    value={props.useAiQueryMerge}
-                    action={({value}) => props.onUseAiQueryMergeChanged(Boolean(value))}
-                  />
-                </StackPanel.Item>
-                <StackPanel.Item>
-                  <Text color={Text.Color.SECONDARY}>Merge to Current Query may use NetSuite AI tokens.</Text>
-                </StackPanel.Item>
-              </StackPanel.Vertical>
-            </StackPanel.Item>
-            <StackPanel.Item>
               <TextArea
                 text={props.draft}
                 rowCount={4}
@@ -102,7 +88,7 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
               />
             </StackPanel.Item>
             <StackPanel.Item>
-              <StackPanel alignment={StackPanel.Alignment.CENTER} itemGap={StackPanel.GapSize.MEDIUM}>
+              <StackPanel alignment={StackPanel.Alignment.CENTER} itemGap={StackPanel.GapSize.MEDIUM} wrap={true} wrapGap={StackPanel.GapSize.SMALL}>
                 <StackPanel.Item shrink={0}>
                   <Button
                     label={props.running ? 'Asking...' : 'Ask AI'}
@@ -112,6 +98,22 @@ export function RecordChatPanel(props: RecordChatPanelProps) {
                 </StackPanel.Item>
                 <StackPanel.Item shrink={0}>
                   <Button label={'Clear Chat'} action={props.onClear} />
+                </StackPanel.Item>
+                <StackPanel.Item shrink={0}>
+                  <span title={'Chat History'}>
+                    <Button label={'History'} icon={SystemIcon.LIST} action={props.onToggleHistory} />
+                  </span>
+                </StackPanel.Item>
+                <StackPanel.Item shrink={0}>
+                  <CheckBox
+                    label={'Use AI query merging'}
+                    labelPosition={CheckBox.LabelPosition.RIGHT}
+                    value={props.useAiQueryMerge}
+                    action={({value}) => props.onUseAiQueryMergeChanged(Boolean(value))}
+                  />
+                </StackPanel.Item>
+                <StackPanel.Item grow={1}>
+                  <Text color={Text.Color.SECONDARY}>Merge to Current Query may use NetSuite AI tokens.</Text>
                 </StackPanel.Item>
               </StackPanel>
             </StackPanel.Item>

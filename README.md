@@ -37,6 +37,7 @@ See [Why SuiteApp](./docs/WHY_SUITEAPP.md) for the fuller rationale.
 - Query Editor `AI Chat` toggle that opens a floating chat panel.
 - AI chat uses the NetSuite `N/llm` module, opens in a resizable floating panel with a close button, renders Markdown responses, and includes the current Query Editor SQL as context when users ask to fix, explain, improve, or optimize a query.
 - AI SQL code blocks include actions to insert the SQL into Query Editor or merge it into the current editor text, with optional AI-assisted merging.
+- AI chat history is stored in browser storage with controls for new chats, loading prior chats, deleting individual chats, and clearing all chat history. See [How to Use](./docs/HOW_TO_USE.md#use-ai-chat-history).
 - RESTlet-based execution with `N/query.runSuiteQL` or `N/query.runSuiteQLPaged`.
 - Paginated result mode with configurable rows per page and page count. The page count defaults to `50`.
 - `Run as SuiteQLPaged` checkbox for paged execution, with unchecked direct `runSuiteQL` mode that automatically falls back to paged execution when the result appears capped.

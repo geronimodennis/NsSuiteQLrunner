@@ -1084,7 +1084,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         props.messages.forEach((message, index) => {
             responseItems.push(jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: message.role === 'user' ? 'You' : 'AI' }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: message.role === 'assistant' ? (renderMarkdown(message.text, props.merging, props.onInsertSuiteQL, props.onMergeSuiteQL)) : (renderPlainText(message.text)) })] }) }, `${message.role}-${index}`));
         });
-        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: props.onClose }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.CheckBox, { label: 'Use AI query merging', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.useAiQueryMerge, action: ({ value }) => props.onUseAiQueryMergeChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Merge to Current Query may use NetSuite AI tokens." }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) })] }) })] }) })] }) }));
+        return (jsxRuntime.jsx(component.Portlet, { title: 'AI Report & Schema Chat', icon: core.SystemIcon.HELP, rootStyle: props.rootStyle, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.StackPanel, { alignment: component.StackPanel.Alignment.END, children: jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: props.onClose }) }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { rootStyle: { height: '100%' }, itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Response" }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { height: '100%' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: responseItems }) }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "AI chat tool" }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.TextArea, { text: props.draft, rowCount: 4, resizable: true, resizeDirection: component.TextArea.ResizeDirection.VERTICAL, rootStyle: { width: '100%' }, onTextChanged: ({ text }) => props.onDraftChanged(text) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { alignment: component.StackPanel.Alignment.CENTER, itemGap: component.StackPanel.GapSize.MEDIUM, wrap: true, wrapGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: props.running ? 'Asking...' : 'Ask AI', type: component.Button.Type.PRIMARY, action: props.onAsk }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear Chat', action: props.onClear }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx("span", { title: 'Chat History', children: jsxRuntime.jsx(component.Button, { label: 'History', icon: core.SystemIcon.LIST, action: props.onToggleHistory }) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.CheckBox, { label: 'Use AI query merging', labelPosition: component.CheckBox.LabelPosition.RIGHT, value: props.useAiQueryMerge, action: ({ value }) => props.onUseAiQueryMergeChanged(Boolean(value)) }) }), jsxRuntime.jsx(component.StackPanel.Item, { grow: 1, children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "Merge to Current Query may use NetSuite AI tokens." }) })] }) })] }) })] }) }));
     }
     function renderMarkdown(text, merging, onInsertSuiteQL, onMergeSuiteQL) {
         const items = parseMarkdownBlocks(text).map((block, index) => (jsxRuntime.jsx(component.StackPanel.Item, { children: block.type === 'code' ? (renderCodeBlock(block.content, block.language, merging, onInsertSuiteQL, onMergeSuiteQL)) : (component.FormattedText.markdown(block.content, {
@@ -1191,6 +1191,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
     }
 
     const WORKING_QUERY_STORAGE_KEY = 'suiteqlrunner.workingQuery';
+    const RECORD_CHAT_HISTORY_STORAGE_KEY = 'suiteqlrunner.recordChatHistory';
     class SuiteQLRunner extends core.PureComponent {
         restletGateway = new NetSuiteRestletQueryGateway();
         queryRunner = new QueryRunnerService(this.restletGateway);
@@ -1198,6 +1199,8 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
         constructor(props, context) {
             super(props, context);
             const workingQuery = this.loadWorkingQuery();
+            const chatHistory = this.loadRecordChatHistory();
+            const activeChat = chatHistory[0] || createRecordChatHistoryEntry(initialRecordChatMessages());
             this.state = {
                 query: workingQuery,
                 hints: analyzeSuiteQL(workingQuery),
@@ -1214,14 +1217,12 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 recordChatDraft: '',
                 recordChatError: null,
                 recordChatMerging: false,
-                recordChatMessages: [
-                    {
-                        role: 'assistant',
-                        text: 'Ask about NetSuite reports, searches, record types, field IDs, joins, table relationships, and SuiteQL patterns.'
-                    }
-                ],
+                recordChatHistory: chatHistory.length > 0 ? chatHistory : [activeChat],
+                recordChatHistoryVisible: false,
+                recordChatMessages: activeChat.messages,
                 recordChatRunning: false,
                 recordChatVisible: false,
+                activeRecordChatId: activeChat.id,
                 useAiQueryMerge: true
             };
         }
@@ -1261,9 +1262,29 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                                 height: '100%',
                                 overflow: 'hidden',
                                 direction: 'ltr'
-                            }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onClose: () => this.closeRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }), onInsertSuiteQL: (query) => this.insertSuiteQLFromChat(query), onMergeSuiteQL: (query) => this.mergeSuiteQLFromChat(query), onUseAiQueryMergeChanged: (useAiQueryMerge) => this.setState({ useAiQueryMerge }), useAiQueryMerge: this.state.useAiQueryMerge }) }) }, 'record-chat'));
+                            }, onAsk: () => this.askRecordChat(), onClear: () => this.clearRecordChat(), onClose: () => this.closeRecordChat(), onDraftChanged: (recordChatDraft) => this.setState({ recordChatDraft }), onInsertSuiteQL: (query) => this.insertSuiteQLFromChat(query), onMergeSuiteQL: (query) => this.mergeSuiteQLFromChat(query), onToggleHistory: () => this.toggleRecordChatHistory(), onUseAiQueryMergeChanged: (useAiQueryMerge) => this.setState({ useAiQueryMerge }), useAiQueryMerge: this.state.useAiQueryMerge }) }) }, 'record-chat'));
+            }
+            if (this.state.recordChatVisible && this.state.recordChatHistoryVisible) {
+                items.push(jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, basis: '0px', children: jsxRuntime.jsx("div", { style: {
+                            position: 'fixed',
+                            right: '488px',
+                            top: '84px',
+                            width: '360px',
+                            maxHeight: 'calc(100vh - 108px)',
+                            overflow: 'hidden',
+                            zIndex: '1000',
+                            boxShadow: '0 18px 48px rgba(15, 23, 42, 0.2)'
+                        }, children: this.renderRecordChatHistoryPanel() }) }, 'record-chat-history'));
             }
             return items;
+        }
+        renderRecordChatHistoryPanel() {
+            const historyItems = this.state.recordChatHistory.map((entry) => (jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx("div", { style: {
+                        border: entry.id === this.state.activeRecordChatId ? '1px solid #6f85a8' : '1px solid #d5dce8',
+                        borderRadius: '4px',
+                        padding: '8px'
+                    }, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { children: entry.title }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: formatHistoryDate(entry.updatedAt) }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Load', action: () => this.loadRecordChat(entry.id) }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Delete', action: () => this.deleteRecordChat(entry.id) }) })] }) })] }) }) }, entry.id)));
+            return (jsxRuntime.jsx(component.Portlet, { title: 'AI Chat History', icon: core.SystemIcon.LIST, children: jsxRuntime.jsxs(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.MEDIUM, children: [jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsxs(component.StackPanel, { itemGap: component.StackPanel.GapSize.SMALL, children: [jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'New Chat', type: component.Button.Type.PRIMARY, action: () => this.createNewRecordChat() }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Clear All', action: () => this.clearRecordChatHistory() }) }), jsxRuntime.jsx(component.StackPanel.Item, { shrink: 0, children: jsxRuntime.jsx(component.Button, { label: 'Close', action: () => this.toggleRecordChatHistory() }) })] }) }), jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.ScrollPanel, { orientation: component.ScrollPanel.Orientation.VERTICAL, rootStyle: { maxHeight: 'calc(100vh - 220px)' }, children: jsxRuntime.jsx(component.StackPanel.Vertical, { itemGap: component.StackPanel.GapSize.SMALL, children: historyItems.length > 0 ? historyItems : jsxRuntime.jsx(component.StackPanel.Item, { children: jsxRuntime.jsx(component.Text, { color: component.Text.Color.SECONDARY, children: "No chat history yet." }) }) }) }) })] }) }));
         }
         onQueryChanged(query, caretPosition) {
             this.setState({
@@ -1324,6 +1345,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                     recordChatMessages: outcome.messages,
                     recordChatMerging: false
                 });
+                this.saveActiveRecordChat(outcome.messages);
                 return;
             }
             this.setEditorQuery(mergedQuery);
@@ -1332,6 +1354,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 recordChatMessages: outcome.messages,
                 recordChatMerging: false
             });
+            this.saveActiveRecordChat(outcome.messages);
         }
         basicMergeSuiteQLFromChat(query, warning) {
             const nextQuery = basicMergeQueries(this.state.query, query);
@@ -1385,6 +1408,7 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
                 recordChatMessages: outcome.messages,
                 recordChatRunning: false
             });
+            this.saveActiveRecordChat(outcome.messages);
         }
         toggleRecordChat() {
             this.setState({
@@ -1397,10 +1421,84 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             });
         }
         clearRecordChat() {
+            this.setRecordChatMessages(initialRecordChatMessages(), {
+                recordChatDraft: '',
+                recordChatError: null
+            });
+        }
+        toggleRecordChatHistory() {
             this.setState({
+                recordChatHistoryVisible: !this.state.recordChatHistoryVisible
+            });
+        }
+        createNewRecordChat() {
+            const entry = createRecordChatHistoryEntry(initialRecordChatMessages());
+            const history = [entry, ...this.state.recordChatHistory];
+            this.saveRecordChatHistory(history);
+            this.setState({
+                activeRecordChatId: entry.id,
                 recordChatDraft: '',
                 recordChatError: null,
-                recordChatMessages: []
+                recordChatHistory: history,
+                recordChatMessages: entry.messages
+            });
+        }
+        loadRecordChat(id) {
+            const entry = this.state.recordChatHistory.find((item) => item.id === id);
+            if (!entry) {
+                return;
+            }
+            this.setState({
+                activeRecordChatId: entry.id,
+                recordChatDraft: '',
+                recordChatError: null,
+                recordChatMessages: entry.messages
+            });
+        }
+        deleteRecordChat(id) {
+            const history = this.state.recordChatHistory.filter((entry) => entry.id !== id);
+            const nextActive = id === this.state.activeRecordChatId ? history[0] || createRecordChatHistoryEntry(initialRecordChatMessages()) : null;
+            const nextHistory = history.length > 0 ? history : [nextActive];
+            this.saveRecordChatHistory(nextHistory);
+            if (nextActive) {
+                this.setState({
+                    activeRecordChatId: nextActive.id,
+                    recordChatDraft: '',
+                    recordChatError: null,
+                    recordChatHistory: nextHistory,
+                    recordChatMessages: nextActive.messages
+                });
+                return;
+            }
+            this.setState({
+                recordChatHistory: nextHistory
+            });
+        }
+        clearRecordChatHistory() {
+            const entry = createRecordChatHistoryEntry(initialRecordChatMessages());
+            this.saveRecordChatHistory([entry]);
+            this.setState({
+                activeRecordChatId: entry.id,
+                recordChatDraft: '',
+                recordChatError: null,
+                recordChatHistory: [entry],
+                recordChatMessages: entry.messages
+            });
+        }
+        setRecordChatMessages(messages, extraState = {}) {
+            const history = updateRecordChatHistory(this.state.recordChatHistory, this.state.activeRecordChatId, messages);
+            this.saveRecordChatHistory(history);
+            this.setState({
+                ...extraState,
+                recordChatHistory: history,
+                recordChatMessages: messages
+            });
+        }
+        saveActiveRecordChat(messages) {
+            const history = updateRecordChatHistory(this.state.recordChatHistory, this.state.activeRecordChatId, messages);
+            this.saveRecordChatHistory(history);
+            this.setState({
+                recordChatHistory: history
             });
         }
         loadWorkingQuery() {
@@ -1409,6 +1507,34 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             }
             catch {
                 return '';
+            }
+        }
+        loadRecordChatHistory() {
+            try {
+                const parsed = JSON.parse(window.localStorage.getItem(RECORD_CHAT_HISTORY_STORAGE_KEY) || '[]');
+                if (!Array.isArray(parsed)) {
+                    return [];
+                }
+                return parsed
+                    .filter((entry) => entry && typeof entry.id === 'string' && Array.isArray(entry.messages))
+                    .map((entry) => ({
+                    id: entry.id,
+                    title: String(entry.title || titleRecordChat(entry.messages)),
+                    updatedAt: Number(entry.updatedAt || Date.now()),
+                    messages: normalizeRecordChatMessages(entry.messages)
+                }))
+                    .slice(0, 20);
+            }
+            catch {
+                return [];
+            }
+        }
+        saveRecordChatHistory(history) {
+            try {
+                window.localStorage.setItem(RECORD_CHAT_HISTORY_STORAGE_KEY, JSON.stringify(history.slice(0, 20)));
+            }
+            catch {
+                // Chat history persistence is best-effort; browser or account policy can block storage.
             }
         }
         saveWorkingQuery(query) {
@@ -1473,6 +1599,54 @@ define(['exports', '@uif-js/core/jsx-runtime', '@uif-js/component', '@uif-js/cor
             return current;
         }
         return [current, '-- Merged SuiteQL suggestion', incoming].join('\n\n');
+    }
+    function initialRecordChatMessages() {
+        return [
+            {
+                role: 'assistant',
+                text: 'Ask about NetSuite reports, searches, record types, field IDs, joins, table relationships, and SuiteQL patterns.'
+            }
+        ];
+    }
+    function createRecordChatHistoryEntry(messages) {
+        return {
+            id: `chat-${Date.now()}-${Math.round(Math.random() * 100000)}`,
+            title: titleRecordChat(messages),
+            updatedAt: Date.now(),
+            messages
+        };
+    }
+    function updateRecordChatHistory(history, activeId, messages) {
+        const updatedEntry = {
+            id: activeId,
+            title: titleRecordChat(messages),
+            updatedAt: Date.now(),
+            messages
+        };
+        const updatedHistory = [updatedEntry, ...history.filter((entry) => entry.id !== activeId)];
+        return updatedHistory.slice(0, 20);
+    }
+    function normalizeRecordChatMessages(messages) {
+        const normalized = messages
+            .filter((message) => message && (message.role === 'user' || message.role === 'assistant'))
+            .map((message) => ({
+            role: message.role,
+            text: String(message.text || '')
+        }))
+            .filter((message) => message.text.trim().length > 0);
+        return normalized.length > 0 ? normalized : initialRecordChatMessages();
+    }
+    function titleRecordChat(messages) {
+        const userMessage = messages.find((message) => message.role === 'user' && message.text.trim().length > 0);
+        const text = (userMessage ? userMessage.text : 'New chat').replace(/\s+/g, ' ').trim();
+        return text.length > 48 ? `${text.slice(0, 45)}...` : text;
+    }
+    function formatHistoryDate(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        return date.toLocaleString();
     }
 
     const run = (context) => {

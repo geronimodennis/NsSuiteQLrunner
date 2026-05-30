@@ -1,4 +1,4 @@
-import {ApplicationHeader, ContentPanel, ScrollPanel, StackPanel, ThemeSelector} from '@uif-js/component';
+import {ApplicationHeader, Button, ContentPanel, Portlet, ScrollPanel, StackPanel, Text, ThemeSelector} from '@uif-js/component';
 import {PureComponent, SystemIcon, Theme} from '@uif-js/core';
 import {getCompletions} from './application/CompletionService';
 import {QueryRunnerService} from './application/QueryRunnerService';
@@ -15,6 +15,14 @@ import {RecordChatPanel} from './presentation/RecordChatPanel';
 import {ResultsPanel} from './presentation/ResultsPanel';
 
 const WORKING_QUERY_STORAGE_KEY = 'suiteqlrunner.workingQuery';
+const RECORD_CHAT_HISTORY_STORAGE_KEY = 'suiteqlrunner.recordChatHistory';
+
+interface RecordChatHistoryEntry {
+  id: string;
+  title: string;
+  updatedAt: number;
+  messages: RecordChatMessage[];
+}
 
 interface RunnerState {
   query: string;
@@ -32,9 +40,12 @@ interface RunnerState {
   recordChatDraft: string;
   recordChatError: string | null;
   recordChatMerging: boolean;
+  recordChatHistory: RecordChatHistoryEntry[];
+  recordChatHistoryVisible: boolean;
   recordChatMessages: RecordChatMessage[];
   recordChatRunning: boolean;
   recordChatVisible: boolean;
+  activeRecordChatId: string;
   useAiQueryMerge: boolean;
 }
 
@@ -46,6 +57,8 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   constructor(props, context) {
     super(props, context);
     const workingQuery = this.loadWorkingQuery();
+    const chatHistory = this.loadRecordChatHistory();
+    const activeChat = chatHistory[0] || createRecordChatHistoryEntry(initialRecordChatMessages());
 
     this.state = {
       query: workingQuery,
@@ -63,14 +76,12 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       recordChatDraft: '',
       recordChatError: null,
       recordChatMerging: false,
-      recordChatMessages: [
-        {
-          role: 'assistant',
-          text: 'Ask about NetSuite reports, searches, record types, field IDs, joins, table relationships, and SuiteQL patterns.'
-        }
-      ],
+      recordChatHistory: chatHistory.length > 0 ? chatHistory : [activeChat],
+      recordChatHistoryVisible: false,
+      recordChatMessages: activeChat.messages,
       recordChatRunning: false,
       recordChatVisible: false,
+      activeRecordChatId: activeChat.id,
       useAiQueryMerge: true
     };
   }
@@ -191,6 +202,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
               onDraftChanged={(recordChatDraft) => this.setState({recordChatDraft})}
               onInsertSuiteQL={(query) => this.insertSuiteQLFromChat(query)}
               onMergeSuiteQL={(query) => this.mergeSuiteQLFromChat(query)}
+              onToggleHistory={() => this.toggleRecordChatHistory()}
               onUseAiQueryMergeChanged={(useAiQueryMerge) => this.setState({useAiQueryMerge})}
               useAiQueryMerge={this.state.useAiQueryMerge}
             />
@@ -199,7 +211,88 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       );
     }
 
+    if (this.state.recordChatVisible && this.state.recordChatHistoryVisible) {
+      items.push(
+        <StackPanel.Item key={'record-chat-history'} shrink={0} basis={'0px'}>
+          <div
+            style={{
+              position: 'fixed',
+              right: '488px',
+              top: '84px',
+              width: '360px',
+              maxHeight: 'calc(100vh - 108px)',
+              overflow: 'hidden',
+              zIndex: '1000',
+              boxShadow: '0 18px 48px rgba(15, 23, 42, 0.2)'
+            }}
+          >
+            {this.renderRecordChatHistoryPanel()}
+          </div>
+        </StackPanel.Item>
+      );
+    }
+
     return items;
+  }
+
+  private renderRecordChatHistoryPanel() {
+    const historyItems = this.state.recordChatHistory.map((entry) => (
+      <StackPanel.Item key={entry.id}>
+        <div
+          style={{
+            border: entry.id === this.state.activeRecordChatId ? '1px solid #6f85a8' : '1px solid #d5dce8',
+            borderRadius: '4px',
+            padding: '8px'
+          }}
+        >
+          <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
+            <StackPanel.Item>
+              <Text>{entry.title}</Text>
+            </StackPanel.Item>
+            <StackPanel.Item>
+              <Text color={Text.Color.SECONDARY}>{formatHistoryDate(entry.updatedAt)}</Text>
+            </StackPanel.Item>
+            <StackPanel.Item>
+              <StackPanel itemGap={StackPanel.GapSize.SMALL}>
+                <StackPanel.Item shrink={0}>
+                  <Button label={'Load'} action={() => this.loadRecordChat(entry.id)} />
+                </StackPanel.Item>
+                <StackPanel.Item shrink={0}>
+                  <Button label={'Delete'} action={() => this.deleteRecordChat(entry.id)} />
+                </StackPanel.Item>
+              </StackPanel>
+            </StackPanel.Item>
+          </StackPanel.Vertical>
+        </div>
+      </StackPanel.Item>
+    ));
+
+    return (
+      <Portlet title={'AI Chat History'} icon={SystemIcon.LIST}>
+        <StackPanel.Vertical itemGap={StackPanel.GapSize.MEDIUM}>
+          <StackPanel.Item>
+            <StackPanel itemGap={StackPanel.GapSize.SMALL}>
+              <StackPanel.Item shrink={0}>
+                <Button label={'New Chat'} type={Button.Type.PRIMARY} action={() => this.createNewRecordChat()} />
+              </StackPanel.Item>
+              <StackPanel.Item shrink={0}>
+                <Button label={'Clear All'} action={() => this.clearRecordChatHistory()} />
+              </StackPanel.Item>
+              <StackPanel.Item shrink={0}>
+                <Button label={'Close'} action={() => this.toggleRecordChatHistory()} />
+              </StackPanel.Item>
+            </StackPanel>
+          </StackPanel.Item>
+          <StackPanel.Item>
+            <ScrollPanel orientation={ScrollPanel.Orientation.VERTICAL} rootStyle={{maxHeight: 'calc(100vh - 220px)'}}>
+              <StackPanel.Vertical itemGap={StackPanel.GapSize.SMALL}>
+                {historyItems.length > 0 ? historyItems : <StackPanel.Item><Text color={Text.Color.SECONDARY}>No chat history yet.</Text></StackPanel.Item>}
+              </StackPanel.Vertical>
+            </ScrollPanel>
+          </StackPanel.Item>
+        </StackPanel.Vertical>
+      </Portlet>
+    );
   }
 
   private onQueryChanged(query: string, caretPosition: number) {
@@ -276,6 +369,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
         recordChatMessages: outcome.messages,
         recordChatMerging: false
       });
+      this.saveActiveRecordChat(outcome.messages);
       return;
     }
 
@@ -285,6 +379,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       recordChatMessages: outcome.messages,
       recordChatMerging: false
     });
+    this.saveActiveRecordChat(outcome.messages);
   }
 
   private basicMergeSuiteQLFromChat(query: string, warning: string | null) {
@@ -353,6 +448,7 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       recordChatMessages: outcome.messages,
       recordChatRunning: false
     });
+    this.saveActiveRecordChat(outcome.messages);
   }
 
   private toggleRecordChat() {
@@ -368,10 +464,100 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
   }
 
   private clearRecordChat() {
+    this.setRecordChatMessages(initialRecordChatMessages(), {
+      recordChatDraft: '',
+      recordChatError: null
+    });
+  }
+
+  private toggleRecordChatHistory() {
     this.setState({
+      recordChatHistoryVisible: !this.state.recordChatHistoryVisible
+    });
+  }
+
+  private createNewRecordChat() {
+    const entry = createRecordChatHistoryEntry(initialRecordChatMessages());
+    const history = [entry, ...this.state.recordChatHistory];
+
+    this.saveRecordChatHistory(history);
+    this.setState({
+      activeRecordChatId: entry.id,
       recordChatDraft: '',
       recordChatError: null,
-      recordChatMessages: []
+      recordChatHistory: history,
+      recordChatMessages: entry.messages
+    });
+  }
+
+  private loadRecordChat(id: string) {
+    const entry = this.state.recordChatHistory.find((item) => item.id === id);
+
+    if (!entry) {
+      return;
+    }
+
+    this.setState({
+      activeRecordChatId: entry.id,
+      recordChatDraft: '',
+      recordChatError: null,
+      recordChatMessages: entry.messages
+    });
+  }
+
+  private deleteRecordChat(id: string) {
+    const history = this.state.recordChatHistory.filter((entry) => entry.id !== id);
+    const nextActive = id === this.state.activeRecordChatId ? history[0] || createRecordChatHistoryEntry(initialRecordChatMessages()) : null;
+    const nextHistory = history.length > 0 ? history : [nextActive as RecordChatHistoryEntry];
+
+    this.saveRecordChatHistory(nextHistory);
+
+    if (nextActive) {
+      this.setState({
+        activeRecordChatId: nextActive.id,
+        recordChatDraft: '',
+        recordChatError: null,
+        recordChatHistory: nextHistory,
+        recordChatMessages: nextActive.messages
+      });
+      return;
+    }
+
+    this.setState({
+      recordChatHistory: nextHistory
+    });
+  }
+
+  private clearRecordChatHistory() {
+    const entry = createRecordChatHistoryEntry(initialRecordChatMessages());
+
+    this.saveRecordChatHistory([entry]);
+    this.setState({
+      activeRecordChatId: entry.id,
+      recordChatDraft: '',
+      recordChatError: null,
+      recordChatHistory: [entry],
+      recordChatMessages: entry.messages
+    });
+  }
+
+  private setRecordChatMessages(messages: RecordChatMessage[], extraState: Partial<RunnerState> = {}) {
+    const history = updateRecordChatHistory(this.state.recordChatHistory, this.state.activeRecordChatId, messages);
+
+    this.saveRecordChatHistory(history);
+    this.setState({
+      ...extraState,
+      recordChatHistory: history,
+      recordChatMessages: messages
+    } as RunnerState);
+  }
+
+  private saveActiveRecordChat(messages: RecordChatMessage[]) {
+    const history = updateRecordChatHistory(this.state.recordChatHistory, this.state.activeRecordChatId, messages);
+
+    this.saveRecordChatHistory(history);
+    this.setState({
+      recordChatHistory: history
     });
   }
 
@@ -380,6 +566,36 @@ export default class SuiteQLRunner extends PureComponent<Record<string, never>, 
       return window.localStorage.getItem(WORKING_QUERY_STORAGE_KEY) || '';
     } catch {
       return '';
+    }
+  }
+
+  private loadRecordChatHistory(): RecordChatHistoryEntry[] {
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(RECORD_CHAT_HISTORY_STORAGE_KEY) || '[]');
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed
+        .filter((entry) => entry && typeof entry.id === 'string' && Array.isArray(entry.messages))
+        .map((entry) => ({
+          id: entry.id,
+          title: String(entry.title || titleRecordChat(entry.messages)),
+          updatedAt: Number(entry.updatedAt || Date.now()),
+          messages: normalizeRecordChatMessages(entry.messages)
+        }))
+        .slice(0, 20);
+    } catch {
+      return [];
+    }
+  }
+
+  private saveRecordChatHistory(history: RecordChatHistoryEntry[]) {
+    try {
+      window.localStorage.setItem(RECORD_CHAT_HISTORY_STORAGE_KEY, JSON.stringify(history.slice(0, 20)));
+    } catch {
+      // Chat history persistence is best-effort; browser or account policy can block storage.
     }
   }
 
@@ -459,4 +675,67 @@ function basicMergeQueries(currentQuery: string, incomingQuery: string) {
   }
 
   return [current, '-- Merged SuiteQL suggestion', incoming].join('\n\n');
+}
+
+function initialRecordChatMessages(): RecordChatMessage[] {
+  return [
+    {
+      role: 'assistant',
+      text: 'Ask about NetSuite reports, searches, record types, field IDs, joins, table relationships, and SuiteQL patterns.'
+    }
+  ];
+}
+
+function createRecordChatHistoryEntry(messages: RecordChatMessage[]): RecordChatHistoryEntry {
+  return {
+    id: `chat-${Date.now()}-${Math.round(Math.random() * 100000)}`,
+    title: titleRecordChat(messages),
+    updatedAt: Date.now(),
+    messages
+  };
+}
+
+function updateRecordChatHistory(
+  history: RecordChatHistoryEntry[],
+  activeId: string,
+  messages: RecordChatMessage[]
+): RecordChatHistoryEntry[] {
+  const updatedEntry = {
+    id: activeId,
+    title: titleRecordChat(messages),
+    updatedAt: Date.now(),
+    messages
+  };
+  const updatedHistory = [updatedEntry, ...history.filter((entry) => entry.id !== activeId)];
+
+  return updatedHistory.slice(0, 20);
+}
+
+function normalizeRecordChatMessages(messages: RecordChatMessage[]): RecordChatMessage[] {
+  const normalized = messages
+    .filter((message) => message && (message.role === 'user' || message.role === 'assistant'))
+    .map((message) => ({
+      role: message.role,
+      text: String(message.text || '')
+    }))
+    .filter((message) => message.text.trim().length > 0);
+
+  return normalized.length > 0 ? normalized : initialRecordChatMessages();
+}
+
+function titleRecordChat(messages: RecordChatMessage[]) {
+  const userMessage = messages.find((message) => message.role === 'user' && message.text.trim().length > 0);
+  const text = (userMessage ? userMessage.text : 'New chat').replace(/\s+/g, ' ').trim();
+
+  return text.length > 48 ? `${text.slice(0, 45)}...` : text;
+}
+
+function formatHistoryDate(value: number) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleString();
 }
